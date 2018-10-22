@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537549028196.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6EE383F9",
+    "lastKnownWriteTime" : 1537351423,
+    "last_content_update" : 1537351423,
+    "path" : "~/R/Proof_Concept/visualise_ER_example_gviz_SNCA_ERLIN1_sonia.R",
+    "project_path" : "visualise_ER_example_gviz_SNCA_ERLIN1_sonia.R",
+    "properties" : {
+        "cursorPosition" : "38,0",
+        "scrollLine" : "24"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
