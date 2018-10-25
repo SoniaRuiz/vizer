@@ -182,7 +182,6 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
 
-
   ############################################################
   ##################### MAIN FUNCTION ########################
   ############################################################  
@@ -233,12 +232,7 @@ server <- function(input, output, session) {
       shinyjs::enable("download_plot")
       shinyjs::enable("download_data")
       
-      ######### ENABLE ZOOMING ###########
-      if(input$gen_browser_panel == "Plot"){
-        session$sendCustomMessage(type = 'startzoom',message = list())             
-      }
-      
-      ######### RETUNR DATA ###########
+      ######### RETURN DATA ###########
       list(data = data)
     })
   })
@@ -247,9 +241,14 @@ server <- function(input, output, session) {
   ############################################################
   ####################### OBSERVERS ##########################
   ############################################################  
-  
+
+  observe({
+    if(input$update > 0){
+      session$sendCustomMessage(type = 'startzoom',
+                                message = list())             
+    }
+  })
   observeEvent(input$gen_browser_panel,{
-    
     if(input$gen_browser_panel == "Plot"){
         session$sendCustomMessage(type = 'startzoom', message = list())       
     }
@@ -271,7 +270,6 @@ server <- function(input, output, session) {
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
-    
   }, deleteFile = FALSE)
   
   ######### SUMMARY TAB ###########
@@ -282,7 +280,7 @@ server <- function(input, output, session) {
   ######### DOWNLOAD TAB ###########
   output$download_plot = downloadHandler(
     filename = function() {
-      paste0("plot-", Sys.Time(), ".png", sep="")
+      paste0("plot-", Sys.time(), ".png", sep="")
     },
     content = function(file) {
       dev.copy(file = file, device = png, res = 600, width = 10, height = 11.69/2, units = "in")
