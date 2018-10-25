@@ -11,31 +11,31 @@ library(regioneR)
 # OMIM_wd <- Sys.getenv("OMIM_wd")
 # setwd(OMIM_wd)
 
-setwd("/home/dzhang/projects/OMIM_wd")
+#setwd("/home/dzhang/projects/OMIM_wd")
 
 # Load data -------------------------------------------------------------------------------------------
 
 #details for the expressed regions.
-load(file = "results/annotate_ERs/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
+load(file = "./data/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
 
 
-tissue_optimal_cut_off_max_gap_df <- read_delim("results/optimise_derfinder_cut_off/exon_delta_details_optimised_maxgap_cutoff.csv", delim = ",")
+tissue_optimal_cut_off_max_gap_df <- read_delim("./data/exon_delta_details_optimised_maxgap_cutoff.csv", delim = ",")
 
-gtex_tissue_name_formatting <- read_delim("raw_data/gtex_tissue_name_formatting/OMIM_gtex_tissue_name_formatting.csv", delim = ",")
+gtex_tissue_name_formatting <- read_delim("./data/OMIM_gtex_tissue_name_formatting.csv", delim = ",")
 
-SNCA_locus_inde_signals <- read_table2("raw_data/SNCA_locus_inde_signals/SNCA_locus_inde_signals.bed", col_names = c("chr", "start", "end", "rsid"))
+SNCA_locus_inde_signals <- read_table2("./data/SNCA_locus_inde_signals.bed", col_names = c("chr", "start", "end", "rsid"))
 
 # Functions -------------------------------------------------------------------------------------------
 
 ##### First level #####
 
-source("/home/dzhang/misc_projects/bioinformatics_misc/bioinformatics_misc_git/generate_txDb_from_gtf.R")
-source("/home/dzhang/projects/constraint_conservation_wd/constraint_conservation/constraint/constraint_general/constraint_general_functions.R")
+source("./data/generate_txDb_from_gtf.R")
+source("./data/constraint_general_functions.R")
 
 get_gtex_split_read_table_mean_cov_n_samples_df <- function(gtex_tissue_name_formatting){
   
   gtex_split_read_table_annotated_paths <- 
-    list.files("/data/recount/GTEx_SRP012682/gtex_split_read_table_annotated_rda/", full.names = T)
+    list.files("./data/gtex_split_read_table_annotated_rda/", full.names = T)
   
   gtex_split_read_table_df <- 
     data_frame(gtex_split_read_table_annotated_paths = gtex_split_read_table_annotated_paths, 
@@ -320,8 +320,8 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tis
 
 ##### Second level #####
 
-source("/home/dzhang/projects/constraint_conservation_wd/constraint_conservation/conservation/conservation_general/conservation_general_functions.R")
-source("/home/dzhang/misc_projects/bioinformatics_misc/bioinformatics_misc_git/query_biomart.R")
+source("./data/conservation_general_functions.R")
+source("./data/query_biomart.R")
 
 get_annot_track_ERs <- function(ERs_w_annotation_df_to_plot, tissues_to_plot){
   
@@ -681,13 +681,13 @@ gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_sample
 
 #Se carga en el objeto 'ensembl_grch38_v92_genes_txdb' la información completa desde Ensembl
 ensembl_grch38_v92_genes_txdb <- 
-  generate_txDb_from_gtf(gtf_gff3_path = "/data/references/ensembl/gtf_gff3/v92/Homo_sapiens.GRCh38.92.gtf", 
-                         output_path = "/data/references/ensembl/txdb_sqlite/v92/ensembl_grch38_v92_txdb.sqlite",
+  generate_txDb_from_gtf(gtf_gff3_path = "./data/Homo_sapiens.GRCh38.92.gtf", 
+                         output_path = "./data/ensembl_grch38_v92_txdb.sqlite",
                          seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
 
 aceview_hg38_txdb <- 
-  generate_txDb_from_gtf(gtf_gff3_path = "/data/references/aceview/gff/AceView.ncbi_37.genes_gff.gff", 
-                         output_path = "/data/references/aceview/txdb_sqlite/aceview_hg38_txdb.sqlite",
+  generate_txDb_from_gtf(gtf_gff3_path = "./data/AceView.ncbi_37.genes_gff.gff", 
+                         output_path = "./data/aceview_hg38_txdb.sqlite",
                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 
 #De todo mi fichero, me quedo solo con aquellas filas que:

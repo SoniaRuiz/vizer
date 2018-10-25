@@ -1,17 +1,17 @@
 library(tidyverse)
 library(stringr)
-library(Gviz) 
+library(Gviz) # one for plitting 
 library(ggpubr)
 library(regioneR)
 
 # Set WD ----------------------------------------------------------------------------------------------
 
-OMIM_wd <- "/home/dzhang/projects/OMIM_wd"
-setwd(OMIM_wd)
+#OMIM_wd <- Sys.getenv("OMIM_wd")
+#setwd(OMIM_wd)
 
 # Load data -------------------------------------------------------------------------------------------
 
-load(file = "results/annotate_ERs/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
+load(file = "data/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
 
 tissue_optimal_cut_off_max_gap_df <- read_delim("results/optimise_derfinder_cut_off/exon_delta_details_optimised_maxgap_cutoff.csv", delim = ",")
 
@@ -103,7 +103,7 @@ get_ER_table_to_display <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_t
     ERs_w_annotation_df %>% 
     filter(seqnames == seqnames_to_plot, start >= start_to_plot, end <= end_to_plot, 
            tissue %in% tissues_to_plot) %>% 
-    dplyr::select(ER_seqnames = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, overlap_any_gene_v92_name, 
+    dplyr::select(ER_chr = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, overlap_any_gene_v92_name, 
                   split_read_annotation_type = annotationType_split_read_annot, annotationType_split_read_annot, split_read_to_any_gene = uniq_genes_split_read_annot, 
                   mean_CDTS_percentile, mean_phast_cons_7, mean_phast_cons_100)
   
@@ -201,11 +201,11 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_to_s
   # get symbol to plot 
   gene_id_to_plot <- str_c(na.omit(c(ensembl_gene_id_to_symbol_df_dup$external_gene_name, ensembl_gene_id_to_symbol_df_dup$ensembl_gene_id)), collapse = "/")
   
-  ga_track <- GenomeAxisTrack(range = IRanges(start = start(gene_cord), end = end(gene_cord), names = gene_id_to_plot), 
+  ga_track <- GenomeAxisTrack(range = IRanges(start = start(gene_cord), end = end(gene_cord), names = gene_id_to_plot),  
                               showId = TRUE, add53 = TRUE, add35 = TRUE, 
                               fill.range = get_palette("npg", 3)[3], col.range = "black", 
-                              cex.id = 1, col = "black", fontcolor = "black", labelPos = "below", size = 2, 
-                              background.title = "black", showTitle = F)
+                              cex.id = 0.8, col = "black", fontcolor = "black", labelPos = "below", size = 2, 
+                              background.title = "black", showTitle = T, name = seqnames_to_plot)
   
   # plotTracks(ga_track, from = start_to_plot, to = end_to_plot)
   
@@ -334,7 +334,7 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_to_s
   plotTracks(trackList = all_annot_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.4, fontsize = 8, 
              sizes = all_annot_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
   
-  plotTracks(list_dummy_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.3, add = T, fontsize = 12,
+  plotTracks(list_dummy_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.3, add = T, fontsize = 8,
              sizes = list_dummy_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
             
 }
@@ -716,19 +716,19 @@ ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific <-
   filter(width > 3, !str_detect(tissue, "cells|testis|vagina|ovary|uterus|prostate|cervix|bladder|fallopian|breast"),
          ensembl_grch38_v92_region_annot != "exon, intergenic, intron")
 
-# ERs_w_annotation_df <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific
-# txdb <- ensembl_grch38_v92_genes_txdb
-# ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-# gene_id <- "SNCA"
-# tissues_to_plot <- c("frontalcortexba9", "brain_cerebellum")
-# genome_build <- "hg38"
-# get_constraint <- T
-# get_conserv <- F
-# propor_samples_split_read <- 0.05
-# extend_region_to_plot <- 30000
-# aceview_annot <- aceview_hg38_txdb
-# add_custom_annot_track <- NULL
-# all_split_reads <- F
+ERs_w_annotation_df <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific
+txdb <- ensembl_grch38_v92_genes_txdb
+ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+gene_id <- "SNCA"
+tissues_to_plot <- c("frontalcortexba9", "brain_cerebellum")
+genome_build <- "hg38"
+get_constraint <- T
+get_conserv <- F
+propor_samples_split_read <- 0.05
+extend_region_to_plot <- 30000
+aceview_annot <- aceview_hg38_txdb
+add_custom_annot_track <- NULL
+all_split_reads <- F
 # 
 # visualise_ER_example(ERs_w_annotation_df, txdb, ensembl_gene_id_to_symbol_df,
 #                      ensembl_gene_id,
