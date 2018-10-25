@@ -242,6 +242,8 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$update,{
+    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Summary")
+    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
     session$sendCustomMessage(type = 'startzoom', message = list())
   })
   
