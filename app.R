@@ -14,7 +14,7 @@ source("~/R/GenomeBrowser/visualise_ER_example_gviz_v2.R")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
+  
   shinyjs::useShinyjs(),
   
   navbarPage("Genomic Browser",
@@ -92,34 +92,35 @@ ui <- fluidPage(
                                               shiny::tags$head(shiny::tags$script(src = "jquery.elevatezoom.min.js")),
                                               singleton(
                                                 shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
-                                                                  function(message) {
-                                                                    $("#plot img").elevateZoom({
-                                                                        zoomWindowPosition: 11,
-                                                                        zoomWindowWidth:550,
-                                                                        zoomWindowHeight:500,
-                                                                        scrollZoom : true
-                                                                    });
-                                                                  }
-                                                                );'),
+                                                                                    function(message) {
+                                                                                    $("#plot img").elevateZoom({
+                                                                                    zoomWindowPosition:11,
+                                                                                    zoomWindowWidth:550,
+                                                                                    zoomWindowHeight:500,
+                                                                                    scrollZoom:true
+                                                                                    });
+                                                                                    }
+                                                                  );'),
                                                                  shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
-                                                                  function(message) {
-                                                                    $.removeData($("#plot img"), "elevateZoom");
-                                                                    $(".zoomContainer").remove();
-                                                                  }
-                                                                );'))
-                                              ),
-                                              imageOutput("plot")
-                                       )
-                                     )
-                            ),
+                                                                                    function(message) {
+                                                                                    $.removeData($("#plot img"), "elevateZoom");
+                                                                                    $(".zoomContainer").remove();
+                                                                                    }
+                                                                 );'),
+                                                                 shiny::tags$script('$(document).on("shiny:value", function(e) {
+                                                                                    console.log(e.name);
+                                                                                    if (e.name == "plot") {  // mytable is the name / id of the output element
+                                                                                    console.log(e.name);
+                                                                                    Shiny.onInputChange("startzoom", "");
+                                                                                    }});')
+                                                                 )),
+                                              
+                                              imageOutput("plot")))),
                             tabPanel(title = 'Summary',
                                      fluidRow(
                                        column(width = 12, 
                                               br(), br(),  
-                                              DT::dataTableOutput("summary")
-                                       )
-                                     )
-                            ),
+                                              DT::dataTableOutput("summary")))),
                             tabPanel(title = 'Download Data',
                                      fluidRow(
                                        column(width = 12, 
@@ -128,13 +129,8 @@ ui <- fluidPage(
                                               p("Please, press next button to download the plot in PNG format:"),
                                               downloadButton(outputId = "download_plot", label = "Download Plot"), br(),br(),
                                               p("Please, press next button to download new expressed regions in CSV format:"),
-                                              downloadButton(outputId = "download_data", label = "Download Data")
-                                       )
-                                     ))
-                          )
-                        )
-                      )
-                    ),
+                                              downloadButton(outputId = "download_data", label = "Download Data"))))
+                                     )))),
              tabPanel("Paper",
                       fluidPage( 
                         titlePanel("Paper"),
@@ -160,8 +156,7 @@ ui <- fluidPage(
                             p("Cu sea vocibus accommodare. Ius tempor omittantur te, ex mel nisl mundi eligendi. Tempor postea animal ea vim. Ut quo sapientem mnesarchum disputando, pro an quidam patrioque."),
                             p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
                           ))
-                          )
-                      )),
+                        ))),
              tabPanel("Help",
                       fluidRow(
                         column(12,
@@ -175,19 +170,19 @@ ui <- fluidPage(
                                tableOutput('annotated_properties'),br(),
                                h1("Annotated Plot"),
                                uiOutput("annotated")
-                      ))
-  ))
-)
+                        ))
+             ))
+  )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-
+  
   ############################################################
   ##################### MAIN FUNCTION ########################
   ############################################################  
   
   gene_plot <- eventReactive(input$update, {
-   
+    
     withProgress(message = 'Making plot...', value = 0.1, min = 0, max = 1, expr =  {
       
       ######### DISABLE BUTTONS ###########
@@ -226,7 +221,7 @@ server <- function(input, output, session) {
                                       tissues_to_plot = input$tissue,
                                       gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
                                       extend_region_to_plot = input$extend_region_to_plot)
-
+      
       ######### ENABLE BUTTONS ###########
       shinyjs::enable("update")
       shinyjs::enable("download_plot")
@@ -241,16 +236,18 @@ server <- function(input, output, session) {
   ############################################################
   ####################### OBSERVERS ##########################
   ############################################################  
-
-  observe({
-    if(input$update > 0){
-      session$sendCustomMessage(type = 'startzoom',
-                                message = list())             
-    }
+  
+  observeEvent(input$startzoom,{
+    session$sendCustomMessage(type = 'startzoom', message = list())
   })
+  
+  observeEvent(input$update,{
+    session$sendCustomMessage(type = 'startzoom', message = list())
+  })
+  
   observeEvent(input$gen_browser_panel,{
     if(input$gen_browser_panel == "Plot"){
-        session$sendCustomMessage(type = 'startzoom', message = list())       
+      session$sendCustomMessage(type = 'startzoom', message = list())       
     }
     else{
       session$sendCustomMessage(type = 'stopzoom', message = list())  
@@ -307,8 +304,6 @@ server <- function(input, output, session) {
         width = "100%",
         alt = "Annotated Plot")
   })
-
- 
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
