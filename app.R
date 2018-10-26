@@ -16,6 +16,7 @@ source("~/R/GenomeBrowser/visualise_ER_example_gviz_v2.R")
 ui <- fluidPage(
   
   shinyjs::useShinyjs(),
+  shiny::tags$head(shiny::tags$style(".shiny-output-error{padding-top: 10px;color: grey;}")),
   
   navbarPage("Genomic Browser",
              
@@ -90,6 +91,7 @@ ui <- fluidPage(
                                      fillRow(
                                        column(width = 12, 
                                               shiny::tags$head(shiny::tags$script(src = "jquery.elevatezoom.min.js")),
+                                              br(),
                                               singleton(
                                                 shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
                                                                                     function(message) {
@@ -119,7 +121,7 @@ ui <- fluidPage(
                             tabPanel(title = 'Summary',
                                      fluidRow(
                                        column(width = 12, 
-                                              br(), br(),  
+                                              br(),  
                                               DT::dataTableOutput("summary")))),
                             tabPanel(title = 'Download Data',
                                      fluidRow(
@@ -181,56 +183,74 @@ server <- function(input, output, session) {
   ##################### MAIN FUNCTION ########################
   ############################################################  
   
-  gene_plot <- eventReactive(input$update, {
+  genePlot <- eventReactive(input$update, {
     
     withProgress(message = 'Making plot...', value = 0.1, min = 0, max = 1, expr =  {
-      
-      ######### DISABLE BUTTONS ###########
-      shinyjs::disable("update")
-      shinyjs::disable("download_plot")
-      shinyjs::disable("download_data")
-      
-      ######### STOP ZOOMING ###########
-      session$sendCustomMessage(type = 'stopzoom',
-                                message = list())  
-      
-      ######### DAVID'S FUNCTIONS ###########
-      visualise_ER_example(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                           txdb = ensembl_grch38_v92_genes_txdb, 
-                           ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
-                           gene_id = input$geneid,
-                           tissues_to_plot = input$tissue, 
-                           genome_build = input$genomebuild,
-                           gtex_split_read_table_mean_cov_df,
-                           tissue_optimal_cut_off_max_gap_df,
-                           get_constraint = input$get_constraint,
-                           get_conserv = input$get_conserv,
-                           get_mean_cov = F,
-                           propor_samples_split_read = input$propor_samples_split_read,
-                           extend_region_to_plot = input$extend_region_to_plot,
-                           collapseTranscripts = "meta",
-                           transcriptAnnotation = "gene",
-                           aceview_annot = NULL,
-                           add_custom_annot_track = NULL,
-                           all_split_reads = input$all_split_reads)
-      dev.print(file = "OMIM_plot.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
-      data <- get_ER_table_to_display(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                                      txdb = ensembl_grch38_v92_genes_txdb, 
-                                      ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
-                                      gene_id = input$geneid, 
-                                      tissues_to_plot = input$tissue,
-                                      gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
-                                      extend_region_to_plot = input$extend_region_to_plot)
-      
-      ######### ENABLE BUTTONS ###########
-      shinyjs::enable("update")
-      shinyjs::enable("download_plot")
-      shinyjs::enable("download_data")
-      
-      ######### RETURN DATA ###########
-      list(data = data)
+
+        ######### DISABLE BUTTONS ###########
+        shinyjs::disable("update")
+        shinyjs::disable("download_plot")
+        shinyjs::disable("download_data")
+        
+        ######### STOP ZOOMING ###########
+        session$sendCustomMessage(type = 'stopzoom',
+                                  message = list())  
+        
+        tryCatch({
+          ######### DAVID'S FUNCTIONS ###########
+          visualise_ER_example(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
+                             txdb = ensembl_grch38_v92_genes_txdb, 
+                             ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                             gene_id = input$geneid,
+                             tissues_to_plot = input$tissue, 
+                             genome_build = input$genomebuild,
+                             gtex_split_read_table_mean_cov_df,
+                             tissue_optimal_cut_off_max_gap_df,
+                             get_constraint = input$get_constraint,
+                             get_conserv = input$get_conserv,
+                             get_mean_cov = F,
+                             propor_samples_split_read = input$propor_samples_split_read,
+                             extend_region_to_plot = input$extend_region_to_plot,
+                             collapseTranscripts = "meta",
+                             transcriptAnnotation = "gene",
+                             aceview_annot = NULL,
+                             add_custom_annot_track = NULL,
+                             all_split_reads = input$all_split_reads)
+            },
+            error = function(e) {
+              #print(paste("ERROR:",e))
+              shinyjs::enable("update")
+            }
+          )
+        dev.print(file = "OMIM_plot.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
+        data <- get_ER_table_to_display(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
+                                        txdb = ensembl_grch38_v92_genes_txdb, 
+                                        ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                                        gene_id = input$geneid, 
+                                        tissues_to_plot = input$tissue,
+                                        gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
+                                        extend_region_to_plot = input$extend_region_to_plot)
+        ######### ENABLE BUTTONS ###########
+        shinyjs::enable("update")
+        shinyjs::enable("download_plot")
+        shinyjs::enable("download_data")
+        
+        ######### RETURN DATA ###########
+        list(data = data)
     })
   })
+  
+  ##########################################################
+  ################# VALIDATE INPUT DATA ####################
+  ##########################################################
+  
+  validateData <- function(){
+    validate(
+      need(input$geneid, 'Please, type a gene.'),
+      need(input$tissue, 'Please, choose a tissue.'),
+      need(input$propor_samples_split_read, 'Please, type a split rate.')
+      )
+  }
   
   
   ############################################################
@@ -256,24 +276,27 @@ server <- function(input, output, session) {
     }
   })
   
+  
   ############################################################
   ################# BROWSER SECTION ##########################
   ############################################################
   
   ######### PLOT TAB ###########
   output$plot <- renderImage({
+    validateData()
     shinyjs::disable("download_plot")
     shinyjs::disable("download_data")
-    gene_plot()
+    genePlot()
+    shinyjs::enable("update")
     list(src = "OMIM_plot.png",  
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
-  }, deleteFile = FALSE)
+  }, deleteFile = F)
   
   ######### SUMMARY TAB ###########
   output$summary = DT::renderDataTable({
-    gene_plot()$data
+    genePlot()$data
   })
   
   ######### DOWNLOAD TAB ###########
@@ -289,7 +312,7 @@ server <- function(input, output, session) {
     downloadHandler(
       filename = "data.csv",
       content = function(file){
-        write.csv(gene_plot()$data,file)
+        write.csv(genePlot()$data,file)
       }
     )
   
@@ -307,5 +330,13 @@ server <- function(input, output, session) {
         alt = "Annotated Plot")
   })
 }
+
+
+onStart <- function() {
+  onStop(function() {
+    if(file.exists("OMIM_plot.png"))
+      file.remove("OMIM_plot.png")
+  })
+}
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, onStart = onStart)
