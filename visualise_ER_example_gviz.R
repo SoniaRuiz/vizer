@@ -1,27 +1,23 @@
 library(tidyverse)
 library(stringr)
-library(Gviz) # one for plotting 
+library(Gviz) # one for plitting 
 library(ggpubr)
 library(regioneR)
 
 # Set WD ----------------------------------------------------------------------------------------------
 
-# OMIM_wd <- Sys.getenv("OMIM_wd")
-# setwd(OMIM_wd)
-
-setwd("/home/dzhang/projects/OMIM_wd")
+#OMIM_wd <- Sys.getenv("OMIM_wd")
+#setwd(OMIM_wd)
 
 # Load data -------------------------------------------------------------------------------------------
 
-#details for the expressed regions.
-load(file = "results/annotate_ERs/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
-
+load(file = "data/ERs_optimised_cut_off_max_gap_all_tissues_w_annot_df.rda")
 
 tissue_optimal_cut_off_max_gap_df <- read_delim("results/optimise_derfinder_cut_off/exon_delta_details_optimised_maxgap_cutoff.csv", delim = ",")
 
 gtex_tissue_name_formatting <- read_delim("raw_data/gtex_tissue_name_formatting/OMIM_gtex_tissue_name_formatting.csv", delim = ",")
 
-SNCA_locus_inde_signals <- read_table2("raw_data/SNCA_locus_inde_signals/SNCA_locus_inde_signals.bed", col_names = c("chr", "start", "end", "rsid"))
+ensembl_gene_id_to_symbol_df_v92 <- read_delim("raw_data/data_description_files/ensembl_gene_id_to_symbol_df_v92.csv", delim = ",")
 
 # Functions -------------------------------------------------------------------------------------------
 
@@ -60,7 +56,6 @@ get_gtex_split_read_table_mean_cov_n_samples_df <- function(gtex_tissue_name_for
   return(gtex_split_read_table_mean_cov_df)
   
 }
-
 
 #' @param ERs_w_annotation_df dataframe with ER coordinates and annotation 
 #' @param txdb txdb object with the definitions of genes inside 
@@ -108,18 +103,20 @@ get_ER_table_to_display <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_t
     ERs_w_annotation_df %>% 
     filter(seqnames == seqnames_to_plot, start >= start_to_plot, end <= end_to_plot, 
            tissue %in% tissues_to_plot) %>% 
-    dplyr::select(ER_seqnames = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, overlap_any_gene_v92_name, 
+    dplyr::select(ER_chr = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, overlap_any_gene_v92_name, 
                   split_read_annotation_type = annotationType_split_read_annot, annotationType_split_read_annot, split_read_to_any_gene = uniq_genes_split_read_annot, 
                   mean_CDTS_percentile, mean_phast_cons_7, mean_phast_cons_100)
   
   return(ERs_w_annotation_df_to_display)
   
 }
+
 #' @param ERs_w_annotation_df dataframe with ER coordinates and annotation 
 #' @param txdb txdb object with the definitions of genes inside 
-#' @param ensembl_gene_id gene id to plot 
-#' @param tissues_to_plot tissues to plot the distribution for
-#' @param genome_build genome build - defaults to hg38 and needs 
+#' @param ensembl_gene_id_to_symbol_df df with all the ensembl gene ids matched to symbols using biomart
+#' @param gene_id gene id to plot 
+#' @param tissues_to_plot tissues to plot
+#' @param genome_build genome build - defaults to hg38 
 #' @param gtex_split_read_table_mean_cov_df df that maps the tissue to it's split read or mean coverage path
 #' @param get_constraint lgl vector indicating whether to plot constraint scores
 #' @param get_conserv lgl vector indicating whether to plot conserv scores 
@@ -129,7 +126,7 @@ get_ER_table_to_display <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_t
 #' @param add_custom_annot_track here gives the option to input your own positions to plot as a GRanges
 #' @param all_split_reads lgl vector determining whether to plot all split reads in the region, not just those that connect to ERs
 #' @return Gviz plot to visualise the ERs in the genomic region or by gene
-visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tissues_to_plot, 
+visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id_to_symbol_df, gene_id, tissues_to_plot, 
                                  genome_build = "hg38", gtex_split_read_table_mean_cov_df, 
                                  tissue_optimal_cut_off_max_gap_df, get_constraint = F, get_conserv = F,  
                                  propor_samples_split_read = 0.05, extend_region_to_plot = 10000, 
@@ -137,81 +134,110 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tis
                                  aceview_annot = NULL, add_custom_annot_track = NULL, 
                                  all_split_reads = F){
   
-  ##### checking statements #####
-  ###############################
-  #Filtro para evaluar si el ID del gen pasado por parámetro se encuentra dentro de la base de datos de Ensembl
-  ensembl_grch38_v92_genes_txdb_genes <- genes(ensembl_grch38_v92_genes_txdb)
-  if(!ensembl_gene_id %in% ensembl_grch38_v92_genes_txdb_genes$gene_id){
-    stop(str_c(ensembl_gene_id, " not found in the txdb provided"))
+  ##### convert symbol to ENSG ID #####
+  
+  if(str_detect(gene_id, "ENSG")){
+    
+    ensembl_gene_id <- gene_id
+    
+  }else{
+    
+    ensembl_gene_id_to_symbol_df_dup <- 
+    ensembl_gene_id_to_symbol_df %>%
+      filter(!duplicated(external_gene_name), # removing instances whereby 2 ensembl ids match onto 1 
+             external_gene_name == gene_id)
+  
+    if(nrow(ensembl_gene_id_to_symbol_df_dup) == 0){
+      
+      stop(str_c(gene_id, " not found in the ensembl database (v92)"))
+      
+    }else{
+      
+      ensembl_gene_id <- ensembl_gene_id_to_symbol_df_dup$ensembl_gene_id
+      
+    }
+    
   }
-  setProgress(value = 0.14)
-  #Filtro para evaluar si el tissue pasado por parámetro se encuentra dentro de los tissues con los que se cuenta
+  
+  ##### checking statements #####
+  
+  # extract all gene definitions from ensembl txdb
+  ensembl_grch38_v92_genes_txdb_genes <- genes(ensembl_grch38_v92_genes_txdb)
+  
+  if(!ensembl_gene_id %in% ensembl_grch38_v92_genes_txdb_genes$gene_id){
+    
+    stop(str_c(ensembl_gene_id, " not found in the txdb provided"))
+    
+  }
+  
   if(all(!tissues_to_plot %in% ERs_w_annotation_df$tissue)){
+    
     stop(str_c(tissues_to_plot, " not found in tissues"))
+    
   }
   
   ##### getting the start stop positions to plot #####
-  ###############################
-  #A partir del objeto que contiene toda la información de Ensembl, buscamos específica de ese gen pasado en ensembl
+  
   gene_cord <- ensembl_grch38_v92_genes_txdb_genes[ensembl_grch38_v92_genes_txdb_genes$gene_id == ensembl_gene_id]
   seqnames_to_plot <- as.character(seqnames(gene_cord))
   start_to_plot <- (start(gene_cord) - extend_region_to_plot)
   end_to_plot <- (end(gene_cord) + extend_region_to_plot)
   bp_plotted <- end_to_plot - start_to_plot
-  setProgress(value = 0.18)
   
-  #Filtramos, dentro de nuestro fichero, para quedarnos sólo con aquellas filas que coincidan con los datos rescatados sobre el gen de Ensembl
   ERs_w_annotation_df_to_plot <- 
     ERs_w_annotation_df %>% 
     filter(seqnames == seqnames_to_plot, start >= start_to_plot, end <= end_to_plot, 
            tissue %in% tissues_to_plot)
-  setProgress(value = 0.2)
-
   
+  ##### Ideogram track - removed because not useful, only for aesthetics #####
   
-  # get symbol
-  # Buscamos el nombre alternativo del gen. (Por ejemplo, el gen ES2222019284 puede llamarse también ASCN).
-  ens_to_symbol <- query_biomart(mart = 38, attributes = c("ensembl_gene_id", "external_gene_name"), filters = "ensembl_gene_id", values = ensembl_gene_id)
-  gene_id_to_plot <- str_c(na.omit(c(ens_to_symbol$ensembl_gene_id, ens_to_symbol$external_gene_name)), collapse = "/")
-  setProgress(value = 0.23)
+  # ideo_track <- IdeogramTrack(genome = "hg38", chromosome = seqnames_to_plot, showBandId = TRUE, 
+  #                             fontcolor = "black", size = 1)
   
+  # plotTracks(ideo_track, from = start_to_plot, to = end_to_plot)
   
-  #Generamos el gráfico de la parte superior, el que contiene la barra con las posiciones
-  ga_track <- GenomeAxisTrack(range = IRanges(start = start(gene_cord), end = end(gene_cord), names = gene_id_to_plot), 
+  ##### Genome axis track #####
+  
+  # get symbol to plot 
+  gene_id_to_plot <- str_c(na.omit(c(ensembl_gene_id_to_symbol_df_dup$external_gene_name, ensembl_gene_id_to_symbol_df_dup$ensembl_gene_id)), collapse = "/")
+  
+  ga_track <- GenomeAxisTrack(range = IRanges(start = start(gene_cord), end = end(gene_cord), names = gene_id_to_plot),  
                               showId = TRUE, add53 = TRUE, add35 = TRUE, 
                               fill.range = get_palette("npg", 3)[3], col.range = "black", 
-                              cex.id = 1, col = "black", fontcolor = "black", labelPos = "below", size = 2, 
+                              cex.id = 0.8, col = "black", fontcolor = "black", labelPos = "below", size = 2, 
                               background.title = "black", showTitle = T, name = seqnames_to_plot)
-  setProgress(value = 0.26)
+  
   # plotTracks(ga_track, from = start_to_plot, to = end_to_plot)
   
   ##### Annotation track - ERs #####
   
   annot_track_ERs_all_tissues <- get_annot_track_ERs(ERs_w_annotation_df_to_plot, tissues_to_plot)
-  setProgress(value = 0.28)
+  
+  # plotTracks(annot_track_ERs_all_tissues[[1]], from = start_to_plot, to = end_to_plot)
+  
   ##### Data track - split reads #####
   
   d_track_split_read_overlayed_all_tissues <- 
     get_data_track_split_read(tissues_to_plot = tissues_to_plot, gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
                               ERs_w_annotation_df_to_plot = ERs_w_annotation_df_to_plot, gtex_split_read_table_annotated_only_junc_coverage = gtex_split_read_table_annotated_only_junc_coverage, 
                               propor_samples_split_read = propor_samples_split_read, gene_cord = gene_cord, extend_region_to_plot = extend_region_to_plot, all_split_reads = all_split_reads)
-  setProgress(value = 0.3)
+  
   ##### Merge ER and split read tracks #####
   
   ER_split_tracks_ordered_all_tissues <- merge_ER_split_read_tracks(tissues_to_plot, annot_track_ERs_all_tissues, d_track_split_read_overlayed_all_tissues)
-
+  
   # plotTracks(ER_split_tracks_ordered_all_tissues, from = start_to_plot, to = end_to_plot, 
   #             sizes = rep(1, length(tissues_to_plot) * 4))
   
   ##### Gene region track - ensembl #####
+  
   print("plotting gene region track for ensembl v92")
-  setProgress(value = 0.35)
+  
   gr_track <- GeneRegionTrack(ensembl_grch38_v92_genes_txdb, genome = genome_build, chromosome = seqnames_to_plot, name = "v92", 
                               collapseTranscripts = collapseTranscripts, transcriptAnnotation = transcriptAnnotation, from = start_to_plot, to = end_to_plot, 
                               background.title = "black", fontcolor.group = "black", col = "black", col.line = "black" , cex.group = 0.5, size = 1.75)
   
   all_annot_tracks <- c(ga_track, ER_split_tracks_ordered_all_tissues, gr_track)
-  setProgress(value = 0.4)
   
   # plotTracks(gr_track, from = start_to_plot, to = end_to_plot, cex.group = 0.4)
   
@@ -237,9 +263,8 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tis
 
     
   }
-  setProgress(value = 0.5)
   
-  # only plot mean cov/constraint/conserv for single tissue
+  # only plot mean coverage for single tissue
   if(length(tissues_to_plot) == 1){
     
     ##### get GR for data tracks - mean coverage/conservation #####
@@ -249,58 +274,58 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tis
     range_to_plot_gr <- GRanges(seqnames = seqnames_to_plot, 
                                 range_to_plot_ir)
     
-    setProgress(value = 0.53)
     ##### Data track - mean coverage #####
     
     d_track_mean_cov_w_cut_off <- get_data_track_mean_cov(gtex_split_read_table_mean_cov_df, tissues_to_plot, range_to_plot_ir, range_to_plot_gr, seqnames_to_plot)
     
     all_annot_tracks <- c(all_annot_tracks, d_track_mean_cov_w_cut_off)
-    setProgress(value = 0.56)
-    ##### Data track - conservation #####
-    
-    if(get_conserv == T){
-      
-      range_to_plot_gr <-
-        get_conservation_score_for_regions(conserv_score_to_load = "phast_cons_7", gr = range_to_plot_gr)
-      
-      d_track_conserv <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "fixed", windowSize = 25, background.title = "black",
-                                   name = "phastcons", size = 1)
-      
-      # plotTracks(d_track_conserv, from = start_to_plot, to = end_to_plot)
-      setProgress(value = 0.58)
-      range_to_plot_gr$mean_phast_cons_7 <- NULL
-      
-      all_annot_tracks <- c(all_annot_tracks, d_track_conserv)
-      
-    }
-    setProgress(value = 0.6)
-    ##### Data track - constraint #####
-    
-    if(get_constraint == T){
-      
-      d_track_constraint <- get_data_track_constraint(seqnames_to_plot, start_to_plot, end_to_plot, CDTS_percentile_N7794_unrelated_all_chrs_gr)
-      setProgress(value = 0.65)
-      # plotTracks(d_track_constraint, from = start_to_plot, to = end_to_plot) 
-      
-      all_annot_tracks <- c(all_annot_tracks, d_track_constraint)
-      
-    }
-    setProgress(value = 0.7)
-    
-    if(!is.null(add_custom_annot_track)){
-      
-      annot_track_custom <- 
-      AnnotationTrack(add_custom_annot_track, 
-                      shape = "box", name = "custom annot", background.title = "black", size = 1, col = "black", fill = "black")
-      
-      # plotTracks(annot_track_custom, from = start_to_plot, to = end_to_plot, col = "black", fill = "black") 
-      setProgress(value = 0.75)
-      all_annot_tracks <- c(all_annot_tracks, annot_track_custom)
-      
-    }
     
   }
-  setProgress(value = 0.8)
+  
+  
+  ##### Data track - conservation #####
+  
+  if(get_conserv == T){
+    
+    range_to_plot_gr <-
+      get_conservation_score_for_regions(conserv_score_to_load = "phast_cons_7", gr = range_to_plot_gr)
+    
+    d_track_conserv <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "fixed", windowSize = 25, background.title = "black",
+                                 name = "phastcons", size = 1)
+    
+    # plotTracks(d_track_conserv, from = start_to_plot, to = end_to_plot)
+    
+    range_to_plot_gr$mean_phast_cons_7 <- NULL
+    
+    all_annot_tracks <- c(all_annot_tracks, d_track_conserv)
+    
+  }
+  
+  ##### Data track - constraint #####
+  
+  if(get_constraint == T){
+    
+    d_track_constraint <- get_data_track_constraint(seqnames_to_plot, start_to_plot, end_to_plot, CDTS_percentile_N7794_unrelated_all_chrs_gr)
+    
+    # plotTracks(d_track_constraint, from = start_to_plot, to = end_to_plot) 
+    
+    all_annot_tracks <- c(all_annot_tracks, d_track_constraint)
+    
+  }
+  
+  ##### Data track - custom #####
+  
+  if(!is.null(add_custom_annot_track)){
+    
+    annot_track_custom <- 
+      AnnotationTrack(add_custom_annot_track, 
+                      shape = "box", name = "custom annot", background.title = "black", size = 1, col = "black", fill = "black")
+    
+    # plotTracks(annot_track_custom, from = start_to_plot, to = end_to_plot, col = "black", fill = "black") 
+    
+    all_annot_tracks <- c(all_annot_tracks, annot_track_custom)
+    
+  }
   
   ##### plot tracks #####
   
@@ -309,11 +334,9 @@ visualise_ER_example <- function(ERs_w_annotation_df, txdb, ensembl_gene_id, tis
   plotTracks(trackList = all_annot_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.4, fontsize = 8, 
              sizes = all_annot_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
   
-  setProgress(value = 0.85)
-  plotTracks(list_dummy_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.3, add = T, fontsize = 12,
+  plotTracks(list_dummy_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.3, add = T, fontsize = 8,
              sizes = list_dummy_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
-  
-  setProgress(value = 0.9)
+            
 }
 
 ##### Second level #####
@@ -327,7 +350,6 @@ get_annot_track_ERs <- function(ERs_w_annotation_df_to_plot, tissues_to_plot){
   
   annot_track_ERs_all_tissues <- list()
   
-  #Por cada tissue indicado, creo un gráfico o track nuevo
   for(i in seq_along(tissues_to_plot)){
     
     tissue_to_plot <- tissues_to_plot[i]
@@ -345,12 +367,14 @@ get_annot_track_ERs <- function(ERs_w_annotation_df_to_plot, tissues_to_plot){
     annot_track_annotated_ERs <- AnnotationTrack(ERs_w_annotation_gr_annotated, 
                                                  shape = "box", name = tissue_to_plot, 
                                                  exon = "#003C67FF", `exon, intron` = "#0073C2FF", exon, intergenic = "#7AA6DCFF", 
-                                                 intergenic = "#A73030FF", intron = "#CD534CFF", background.title = "black", size = 1)
+                                                 intergenic = "#A73030FF", intron = "#CD534CFF", background.title = "black", 
+                                                 col.line = "black", size = 1)
     
     annot_track_unannotated_ERs <- AnnotationTrack(ERs_w_annotation_gr_unannotated, 
                                                    shape = "box", name = tissue_to_plot,
                                                    exon = "#003C67FF", `exon, intron` = "#0073C2FF", exon, intergenic = "#7AA6DCFF", 
-                                                   intergenic = "#A73030FF", intron = "#cc00cc", stacking = "dense", background.title = "black", size = 1)
+                                                   intergenic = "#A73030FF", intron = "#CD534CFF", stacking = "dense", background.title = "black", 
+                                                   col.line = "black", size = 1)
     
     feature(annot_track_annotated_ERs) <-  ERs_w_annotation_gr_annotated$ensembl_grch38_v92_region_annot %>% as.character()                                             
     feature(annot_track_unannotated_ERs) <-  ERs_w_annotation_gr_unannotated$ensembl_grch38_v92_region_annot %>% as.character()
@@ -609,7 +633,7 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
   
   if(nrow(gtex_split_read_table_annotated_only_junc_coverage_to_plot) == 0){
     
-    print(str_c(Sys.time(), " - no split reads to plot attached to ", annot_unannot_ER, " ERs in the ", tissue_to_plot))
+    print(str_c(Sys.time(), " - no split reads to plot attached to ERs in the ", tissue_to_plot))
     
     return(NULL)
     
@@ -677,7 +701,6 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 
 gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
 
-#Se carga en el objeto 'ensembl_grch38_v92_genes_txdb' la información completa desde Ensembl
 ensembl_grch38_v92_genes_txdb <- 
   generate_txDb_from_gtf(gtf_gff3_path = "/data/references/ensembl/gtf_gff3/v92/Homo_sapiens.GRCh38.92.gtf", 
                          output_path = "/data/references/ensembl/txdb_sqlite/v92/ensembl_grch38_v92_txdb.sqlite",
@@ -688,35 +711,27 @@ aceview_hg38_txdb <-
                          output_path = "/data/references/aceview/txdb_sqlite/aceview_hg38_txdb.sqlite",
                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 
-#De todo mi fichero, me quedo solo con aquellas filas que:
-# - Tienen una longitud supuerior a 3 bases = 3 letras = 3 nucleótidos (width > 3)
-# - No pertenecen a ninguno de los tejidos que ahí se indican
-# - Que no pertecen a la región indicada, pues ésta se considera ruido.
-
 ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific <-
   ERs_w_annotation_all_tissues %>%
   filter(width > 3, !str_detect(tissue, "cells|testis|vagina|ovary|uterus|prostate|cervix|bladder|fallopian|breast"),
          ensembl_grch38_v92_region_annot != "exon, intergenic, intron")
 
-
-
-
-# ERs_w_annotation_df <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific
-# txdb <- ensembl_grch38_v92_genes_txdb
-# ensembl_gene_id <- "ENSG00000145335"
-# tissues_to_plot <- c("frontalcortexba9")
-# genome_build <- "hg38"
-# get_constraint <- F
-# get_conserv <- F
-# propor_samples_split_read <- 0.05
-# extend_region_to_plot <- 30000
-# aceview_annot <- aceview_hg38_txdb
-# add_custom_annot_track <- GRanges(str_c(SNCA_locus_inde_signals$chr, ":", 
-#                                   SNCA_locus_inde_signals$start, "-", 
-#                                   SNCA_locus_inde_signals$end))
-# all_split_reads <- T
+ERs_w_annotation_df <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific
+txdb <- ensembl_grch38_v92_genes_txdb
+ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+gene_id <- "SNCA"
+tissues_to_plot <- c("frontalcortexba9", "brain_cerebellum")
+genome_build <- "hg38"
+get_constraint <- T
+get_conserv <- F
+propor_samples_split_read <- 0.05
+extend_region_to_plot <- 30000
+aceview_annot <- aceview_hg38_txdb
+add_custom_annot_track <- NULL
+all_split_reads <- F
 # 
-# visualise_ER_example(ERs_w_annotation_df, txdb, ensembl_gene_id,
+# visualise_ER_example(ERs_w_annotation_df, txdb, ensembl_gene_id_to_symbol_df,
+#                      ensembl_gene_id,
 #                      tissues_to_plot, genome_build = "hg38",
 #                      gtex_split_read_table_mean_cov_df,
 #                      tissue_optimal_cut_off_max_gap_df,
@@ -724,8 +739,8 @@ ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific <-
 #                      get_conserv,
 #                      propor_samples_split_read,
 #                      extend_region_to_plot,
-#                      collapseTranscripts = "all", 
-#                      transcriptAnnotation = "transcript", 
-#                      aceview_annot = NULL, 
-#                      add_custom_annot_track,
+#                      collapseTranscripts = "meta",
+#                      transcriptAnnotation = "gene",
+#                      aceview_annot = NULL,
+#                      add_custom_annot_track = NULL,
 #                      all_split_reads)
