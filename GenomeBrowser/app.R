@@ -10,12 +10,18 @@
 library(shiny)
 library(shinyjs)
 
-source("~/R/Proof_Concept/visualise_ER_example_gviz_sonia.R")
+source("visualise_ER_example_gviz_v3.R")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
+  
   shinyjs::useShinyjs(),
+  shiny::tags$head(
+	includeScript("https://www.googletagmanager.com/gtag/js?id=UA-129116044-1"),
+	shiny::tags$link(rel="shortcut icon", href="ucl-icon.png"),
+	shiny::tags$script(src = "google-analytics.js"),
+	shiny::tags$style(".shiny-output-error{padding-top: 10px;color: grey;}")
+  ),
   
   navbarPage("Genomic Browser",
              
@@ -76,7 +82,7 @@ ui <- fluidPage(
                           sliderInput(inputId = "extend_region_to_plot", label = "Extend region to plot:",
                                       min = 1000, max = 50000, value = 1000, step = 500),
                           checkboxInput("get_constraint", "Get constraint", FALSE),
-                          checkboxInput("get_conserv", "Get conservation", FALSE),
+                          #checkboxInput("get_conserv", "Get conservation", FALSE),
                           checkboxInput("all_split_reads", "All split read", FALSE),
                           actionButton("update", "Accept")
                         ),
@@ -87,21 +93,55 @@ ui <- fluidPage(
                             id = "gen_browser_panel",
                             selected = "Plot",
                             tabPanel(title = 'Plot',
-                                     fluidRow(
+                                     fillRow(
                                        column(width = 12, 
-                                              br(), br(),  
-                                              plotOutput("plot")
-                                       )
-                                     )
-                            ),
+                                              shiny::tags$head(shiny::tags$script(src = "jquery.elevatezoom.js")),
+                                              br(),
+                                              singleton(
+                                                shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
+                                                                                    function(message) {
+                                                                                    
+
+
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
+	$("#plot img").elevateZoom({
+		zoomWindowPosition:7,
+		zoomWindowWidth:250,
+		zoomWindowHeight:200//, 
+		//zoomLensWidth:75,
+		//zoomLensHeight:75
+	});
+}
+else{
+	$("#plot img").elevateZoom({
+		zoomWindowPosition:11,
+		zoomWindowWidth:450,
+		zoomWindowHeight:450,
+		scrollZoom:true
+	});
+}
+                                                                                    }
+                                                                  );'),
+                                                                 shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
+                                                                                    function(message) {
+                                                                                    $.removeData($("#plot img"), "elevateZoom");
+                                                                                    $(".zoomContainer").remove();
+                                                                                    }
+                                                                 );'),
+                                                                 shiny::tags$script('$(document).on("shiny:value", function(e) {
+                                                                                    console.log(e.name);
+                                                                                    if (e.name == "plot") {  // mytable is the name / id of the output element
+                                                                                    console.log(e.name);
+                                                                                    Shiny.onInputChange("startzoom", "");
+                                                                                    }});')
+                                                                 )),
+                                              
+                                              imageOutput("plot")))),
                             tabPanel(title = 'Summary',
                                      fluidRow(
                                        column(width = 12, 
-                                              br(), br(),  
-                                              DT::dataTableOutput("summary")
-                                       )
-                                     )
-                            ),
+                                              br(),  
+                                              DT::dataTableOutput("summary")))),
                             tabPanel(title = 'Download Data',
                                      fluidRow(
                                        column(width = 12, 
@@ -110,150 +150,216 @@ ui <- fluidPage(
                                               p("Please, press next button to download the plot in PNG format:"),
                                               downloadButton(outputId = "download_plot", label = "Download Plot"), br(),br(),
                                               p("Please, press next button to download new expressed regions in CSV format:"),
-                                              downloadButton(outputId = "download_data", label = "Download Data")
-                                       )
-                                     )
-                            )#,
-                            #tabPanel("Help", htmlOutput("help"))
-                          )
-                        )
-                      )
-                    ),
+                                              downloadButton(outputId = "download_data", label = "Download Data"))))
+                                     )))),
              tabPanel("Paper",
-                      titlePanel("David Zhang et al."),
-                      sidebarLayout(
-                        sidebarPanel(
-                          h3("Details"),
-                          shiny::tags$ul(
-                            shiny::tags$li("Title: ..."), 
-                            shiny::tags$li("Author: David Zhang"), 
-                            shiny::tags$li("Publication: ..."),
-                            shiny::tags$li("Volume: ..."),
-                            shiny::tags$li("Issue: ..."),
-                            shiny::tags$li("Year: 2018")
-                          )
-                        ),
-                        mainPanel(
-                          h1("David Zhang et. al"),
-                          h3("Abstract"),
-                          p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-                          h3("Discussion"),
-                          p("Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?")
-                        )
-                      )),
-             tabPanel("Help",
-                      fluidPage(
-                        titlePanel("Help"),
+                      fluidPage( 
+                        titlePanel("Paper"),
                         
                         navlistPanel(
-                          "How to use",
-                          tabPanel("Get constraint", fluidPage(
-                            h1("Get constraint"),
-                            h3("What does it means?"),
+                          "Sections",
+                          tabPanel("Abstract", fluidPage(
+                            h1("Abstract"),
                             p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
                           )),
-                          tabPanel("Get conservation", fluidPage(
-                            h1("Get conservation"),
-                            h3("What does it means?"),
-                            p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+                          tabPanel("Discussion", fluidPage(
+                            h1("Discussion"),
+                            p("Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"),
+                            p("Quod libris noster eum ne. Cetero recusabo sea at, duo laudem philosophia vituperatoribus et. Vide simul consul mea an, in audire diceret facilisi qui. An scripserit consequuntur sed, reque mandamus te duo. Pri dicunt dignissim concludaturque at, vix in eros oportere democritum, ut mel sint tation percipitur."),
+                            p("Pri in suas idque, in epicurei ocurreret est. Sea ut purto omittam signiferumque, sed ex suas libris. Unum labores eloquentiam ius in. Consequat intellegat constituto vis in."),
+                            p("Pro at iuvaret facilisis gubergren, sea id porro ullamcorper. Nisl meis vis cu. Mea brute fuisset te, modus deleniti et sea. Sit et autem dicit utroque, in sit justo laoreet."),
+                            p("Cu sea vocibus accommodare. Ius tempor omittantur te, ex mel nisl mundi eligendi. Tempor postea animal ea vim. Ut quo sapientem mnesarchum disputando, pro an quidam patrioque.")
                           )),
-                          "Results",
-                          tabPanel("New expressed regions", fluidPage(
-                            h1("New expressed regions"),
-                            h3("Intron"),
-                            p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-                            h3("Intergenic"),
-                            p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
-                            
-                          )),
-                          tabPanel("Interpreting the result", fluidPage(
-                            h1("What does it means?"),
+                          tabPanel("Conclussions", fluidPage(
+                            h1("Conclussions"),
+                            p("Pri in suas idque, in epicurei ocurreret est. Sea ut purto omittam signiferumque, sed ex suas libris. Unum labores eloquentiam ius in. Consequat intellegat constituto vis in."),
+                            p("Pro at iuvaret facilisis gubergren, sea id porro ullamcorper. Nisl meis vis cu. Mea brute fuisset te, modus deleniti et sea. Sit et autem dicit utroque, in sit justo laoreet."),
+                            p("Cu sea vocibus accommodare. Ius tempor omittantur te, ex mel nisl mundi eligendi. Tempor postea animal ea vim. Ut quo sapientem mnesarchum disputando, pro an quidam patrioque."),
                             p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
                           ))
-                        )
-                      )
-  ))
-)
+                        ))),
+             tabPanel("Help",
+                      fluidRow(
+                        column(12,
+                               h1("README"),
+                               p("This is a README detailing the columns of the data that are downloaded containing the ER definitions."),
+                               p("Expressed regions (ERs) are continous segments of the genome derived from the derfinder methodolody that have evidence of being transcribed."),
+                               p("ERs have been defined using RNA-sequencing data from 41 different GTEx tissues."),
+                               p("ERs are connected to known genes using split reads (those with a gapped alignment to the genome) with the overarching aim of improving existing gene annotation."),
+                               p("Each row represents 1 ER and each column details one property of the corresponding ER."),br(),
+                               h1("Annotated Properties"),
+                               tableOutput('annotated_properties'),br(),
+                               h1("Annotated Plot"),
+                               uiOutput("annotated")
+                        ))
+             ))
+  )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
-  observeEvent(input$update,{
-    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")})
+  ############################################################
+  ##################### MAIN FUNCTION ########################
+  ############################################################  
   
-
-  
-  gene_plot <- eventReactive(input$update, {
-   
+  genePlot <- eventReactive(input$update, {
+    
     withProgress(message = 'Making plot...', value = 0.1, min = 0, max = 1, expr =  {
-      
-      shinyjs::disable("update")
-      shinyjs::disable("download_plot")
-      shinyjs::disable("download_data")
-      
-      visualise_ER_example(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                           txdb = ensembl_grch38_v92_genes_txdb, 
-                           ensembl_gene_id = input$geneid,
-                           tissues_to_plot = input$tissue, 
-                           genome_build = input$genomebuild,
-                           gtex_split_read_table_mean_cov_df,
-                           tissue_optimal_cut_off_max_gap_df,
-                           get_constraint = input$get_constraint,
-                           get_conserv = input$get_conserv,
-                           propor_samples_split_read = input$propor_samples_split_read,
-                           extend_region_to_plot = input$extend_region_to_plot,
-                           collapseTranscripts = "meta",
-                           transcriptAnnotation = "gene",
-                           aceview_annot = NULL,
-                           add_custom_annot_track = NULL,
-                           all_split_reads = input$all_split_reads)
-      
-      data <- get_ER_table_to_display(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                                      txdb = ensembl_grch38_v92_genes_txdb, 
-                                      ensembl_gene_id_to_symbol_df = input$geneid,
-                                      gene_id = input$geneid, 
-                                      tissues_to_plot = input$tissue,
-                                      gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
-                                      extend_region_to_plot = input$extend_region_to_plot)
-      shinyjs::enable("update")
-      shinyjs::enable("download_plot")
-      shinyjs::enable("download_data")
-      
-      list(data = data)
+
+        ######### DISABLE BUTTONS ###########
+        shinyjs::disable("update")
+        shinyjs::disable("download_plot")
+        shinyjs::disable("download_data")
+        
+        ######### STOP ZOOMING ###########
+        session$sendCustomMessage(type = 'stopzoom',
+                                  message = list())  
+        
+        #tryCatch({
+          ######### DAVID'S FUNCTIONS ###########
+
+          visualise_ER_example(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
+                             txdb = ensembl_grch38_v92_genes_txdb, 
+                             ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                             gene_id = input$geneid,
+                             tissues_to_plot = input$tissue, 
+                             genome_build = input$genomebuild,
+                             gtex_split_read_table_mean_cov_df,
+                             tissue_optimal_cut_off_max_gap_df,
+                             get_constraint = input$get_constraint,
+                             get_conserv = F,#input$get_conserv,
+                             get_mean_cov = F,
+                             propor_samples_split_read = input$propor_samples_split_read,
+                             extend_region_to_plot = input$extend_region_to_plot,
+                             collapseTranscripts = "meta",
+                             transcriptAnnotation = "gene",
+                             aceview_annot = NULL,
+                             add_custom_annot_track = NULL,
+                             all_split_reads = input$all_split_reads)
+
+            #},
+            #error = function(e) {
+              #print(paste("ERROR:",e))
+              shinyjs::enable("update")
+            #}
+          #)
+        data <- get_ER_table_to_display(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
+                                        txdb = ensembl_grch38_v92_genes_txdb, 
+                                        ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                                        gene_id = input$geneid, 
+                                        tissues_to_plot = input$tissue,
+                                        gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
+                                        extend_region_to_plot = input$extend_region_to_plot)
+        ######### ENABLE BUTTONS ###########
+        shinyjs::enable("update")
+        shinyjs::enable("download_plot")
+        shinyjs::enable("download_data")
+	setProgress(value = 0.99)
+        
+        ######### RETURN DATA ###########
+        list(data = data)
     })
   })
   
-
-  output$plot <- renderPlot({
+  ##########################################################
+  ################# VALIDATE INPUT DATA ####################
+  ##########################################################
+  
+  validateData <- function(){
+    validate(
+      need(input$geneid, 'Please, type a gene.'),
+      need(input$tissue, 'Please, choose a tissue.'),
+      need(input$propor_samples_split_read, 'Please, type a split rate.')
+      )
+  }
+  
+  
+  ############################################################
+  ####################### OBSERVERS ##########################
+  ############################################################  
+  
+  observeEvent(input$startzoom,{
+    session$sendCustomMessage(type = 'startzoom', message = list())
+  })
+  
+  observeEvent(input$update,{
+    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Summary")
+    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
+    session$sendCustomMessage(type = 'startzoom', message = list())
+  })
+  
+  observeEvent(input$gen_browser_panel,{
+    if(input$gen_browser_panel == "Plot"){
+      session$sendCustomMessage(type = 'startzoom', message = list())       
+    }
+    else{
+      session$sendCustomMessage(type = 'stopzoom', message = list())  
+    }
+  })
+  
+  
+  ############################################################
+  ################# BROWSER SECTION ##########################
+  ############################################################
+  
+  ######### PLOT TAB ###########
+  output$plot <- renderImage({
+    validateData()
     shinyjs::disable("download_plot")
     shinyjs::disable("download_data")
-    gene_plot()
-  })
-  output$summary = DT::renderDataTable({
-    gene_plot()$data
-  })
-  outputOptions(output, "plot", suspendWhenHidden = FALSE)
-  outputOptions(output, "summary", suspendWhenHidden = FALSE)
+    genePlot()
+    shinyjs::enable("update")
+
+    list(src = "www/SNCA_OMIM_reannot_example.png",  
+         width = "95%",
+         alt = "Plot",
+         contentType = "image/png")
+  }, deleteFile = F)
   
+  ######### SUMMARY TAB ###########
+  output$summary = DT::renderDataTable({
+    genePlot()$data
+  })
+  
+  ######### DOWNLOAD TAB ###########
   output$download_plot = downloadHandler(
     filename = function() {
-      paste0("plot-", Sys.Date(), ".png", sep="")
+      paste0(input$geneid,"-", Sys.time(), ".png", sep="")
     },
-    content = function(file) {
-      dev.copy(file = file, device = png, res = 600, width = 10, height = 11.69/2, units = "in")
-      dev.off()
-    })   
+    content = function(file) { 
+      file.copy("www/SNCA_OMIM_reannot_example.png", file)
+    },
+  contentType = "image/png"
+  )   
   output$download_data <- 
     downloadHandler(
       filename = "data.csv",
       content = function(file){
-        write.csv(head(gene_plot()$data, n=6),file)
+        write.csv(genePlot()$data,file)
       }
     )
-  #output$help <- renderText({
-  #  HTML("<br/><h2>Help to the user</h2><br/><p>We can add here some useful information to the user.</p><br/>")
-  #})
-  #outputOptions(output, "help", suspendWhenHidden = FALSE)
+  
+  ############################################################
+  ################# README SECTION ###########################
+  ############################################################
+  
+  output$annotated_properties <- renderTable({
+    tb <- read.csv(file = "./www/ERproperties.csv", header=T, sep=",")
+    return(tb)
+  })
+  output$annotated <- renderUI({
+    img(src = "annotated_plot.png", 
+        width = "100%",
+        alt = "Annotated Plot")
+  })
+}
+
+
+onStart <- function() {
+  onStop(function() {
+    if(file.exists("OMIM_plot.png"))
+      file.remove("OMIM_plot.png")
+  })
 }
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, onStart = onStart)
