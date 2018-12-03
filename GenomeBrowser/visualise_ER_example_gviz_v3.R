@@ -5,12 +5,12 @@ library(ggpubr)
 library(regioneR)
 
 # Set Dependencies Directory --------------------------------------------------------------------------
-dataDirectory <- "/home_2/gsit/data/"
+dataDirectory <- "./genomebrowser_dependencies/"
 
 # Set WD ----------------------------------------------------------------------------------------------
 
 #OMIM_wd <- Sys.getenv("OMIM_wd")
-setwd("/srv/shiny-server/GenomeBrowser")
+#setwd("/srv/shiny-server/GenomeBrowser")
 
 # Load data -------------------------------------------------------------------------------------------
 
@@ -338,8 +338,6 @@ print(paste0('ook'))
   
   plotTracks(trackList = all_annot_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.4, fontsize = 8, 
              sizes = all_annot_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
-
-
   plotTracks(list_dummy_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.4, add = T, fontsize = 8,
              sizes = list_dummy_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())  
   dev.off()

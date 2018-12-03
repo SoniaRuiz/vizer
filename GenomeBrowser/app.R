@@ -10,7 +10,8 @@
 library(shiny)
 library(shinyjs)
 
-source("visualise_ER_example_gviz_v3.R")
+
+source("global.R")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -190,7 +191,10 @@ else{
                                h1("Annotated Properties"),
                                tableOutput('annotated_properties'),br(),
                                h1("Annotated Plot"),
-                               uiOutput("annotated")
+			       img(src = "annotated_plot.png",
+                                   width = "100%",
+                                   alt = "Annotated Plot")
+			       #uiOutput("annotated")
                         ))
              ))
   )
@@ -201,9 +205,9 @@ server <- function(input, output, session) {
   ############################################################
   ##################### MAIN FUNCTION ########################
   ############################################################  
-  
+
   genePlot <- eventReactive(input$update, {
-    
+
     withProgress(message = 'Making plot...', value = 0.1, min = 0, max = 1, expr =  {
 
         ######### DISABLE BUTTONS ###########
@@ -236,7 +240,7 @@ server <- function(input, output, session) {
                              aceview_annot = NULL,
                              add_custom_annot_track = NULL,
                              all_split_reads = input$all_split_reads)
-
+	
             #},
             #error = function(e) {
               #print(paste("ERROR:",e))
@@ -259,6 +263,7 @@ server <- function(input, output, session) {
         ######### RETURN DATA ###########
         list(data = data)
     })
+
   })
   
   ##########################################################
@@ -347,11 +352,12 @@ server <- function(input, output, session) {
     tb <- read.csv(file = "./www/ERproperties.csv", header=T, sep=",")
     return(tb)
   })
-  output$annotated <- renderUI({
-    img(src = "annotated_plot.png", 
-        width = "100%",
-        alt = "Annotated Plot")
-  })
+  #output$annotated <- renderUI({
+  #  img(src = "annotated_plot.png", 
+  #      width = "100%",
+  #      alt = "Annotated Plot")
+  #})
+
 }
 
 

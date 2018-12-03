@@ -1,0 +1,37 @@
+server:
+  servlet:
+    context-path: /browser/
+proxy:
+  #landing page: /
+  hide-navbar: true
+  heartbeat-rate: 100000
+  heartbeat-timeout: 300000
+  container-wait-time: 300000
+  #authentication: simple
+  authentication: none
+  port: 2525
+  #container-backend: docker
+  #users:
+  #- name: mina
+  #  password: mina
+  #  groups: rytenlab
+  #- name: sonia
+  #  password: sonia
+  #  groups: rytenlab
+  docker:
+    url: http://localhost:2375
+    port-range-start: 20000
+    port-range-max: 20099
+  specs:
+  #- id: 01_hello
+  #  container-cmd: ["R", "-e shinyproxy::run_01_hello()"]
+  #  container-image: openanalytics/shinyproxy-demo
+  #  access-groups: rytenlab
+  - id: GenomeBrowser
+    display-name: Genome Browser
+    container-cmd: ["R", "-e shiny::runApp('/root/GenomeBrowser')"]
+    container-image: genomebrowser-shinyproxy
+   # access-groups: rytenlab
+logging:
+  file:
+    shinyproxy.log
