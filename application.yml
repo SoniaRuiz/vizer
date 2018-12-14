@@ -4,9 +4,9 @@ server:
 proxy:
   #landing page: /
   hide-navbar: true
-  heartbeat-rate: 100000
-  heartbeat-timeout: 300000
-  container-wait-time: 300000
+  heartbeat-rate: 10000
+  heartbeat-timeout: 60000
+  container-wait-time: 100000
   #authentication: simple
   authentication: none
   port: 2525
@@ -19,19 +19,25 @@ proxy:
   #  password: sonia
   #  groups: rytenlab
   docker:
+    #internal-networking: true
     url: http://localhost:2375
     port-range-start: 20000
-    port-range-max: 20099
+    port-range-max: 20020
   specs:
-  #- id: 01_hello
-  #  container-cmd: ["R", "-e shinyproxy::run_01_hello()"]
-  #  container-image: openanalytics/shinyproxy-demo
+  #- id: vizER
+  #  display-name: vizER
+  #  container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
+  #  container-image: vizer_shinyproxy_v2
+  #- id: vizER_complete
+  #  display-name: vizER (complete)
+  #  container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
+  #  container-image: vizer_shinyproxy_v2_complete
+  - id: vizER_small
+    display-name: vizER (small)
+    container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
+    container-image: vizer_shinyproxy_v2_small
+    container-volumes: [ "/home_2/gsit/vizER_data:/root/vizER/vizER_data" ]
   #  access-groups: rytenlab
-  - id: GenomeBrowser
-    display-name: Genome Browser
-    container-cmd: ["R", "-e shiny::runApp('/root/GenomeBrowser')"]
-    container-image: genomebrowser-shinyproxy
-   # access-groups: rytenlab
 logging:
   file:
     shinyproxy.log

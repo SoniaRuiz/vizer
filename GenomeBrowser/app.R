@@ -9,7 +9,61 @@
 
 library(shiny)
 library(shinyjs)
+library(magrittr)
+library(RSQLite)
 
+# Generate alphabetical tissue choices
+
+tissue_GTEx_choices <- c("Adipose - subcutaneous" =	"adipose_subcutaneous",
+                         "Adipose - visceral" =	"adipose_visceral_omentum",
+                         "Adrenal gland" =	"adrenal_gland",
+                         "Aorta" =	"artery_aorta",
+                         "Artery - coronary" =	"artery_coronary",
+                         "Artery - tibial" =	"artery_tibial",
+                         "Amygdala" =	"amygdala",
+                         "Anterior cingulate cortex" =	"anteriorcingulatecortexba24",
+                         "Caudate" =	"caudatebasalganglia",
+                         "Cerebellar hemisphere" =	"brain_cerebellar_hemisphere",
+                         "Cerebellum" =	"brain_cerebellum",
+                         "Cortex"	= "cortex",
+                         "Frontal Cortex" =	"frontalcortexba9",
+                         "Hippocampus" =	"hippocampus",
+                         "Hypothalamus"	= "hypothalamus",
+                         "Nucleus accumbens" =	"nucleusaccumbensbasalganglia",
+                         "Putamen" =	"putamenbasalganglia",
+                         "Spinal cord" =	"spinalcordcervicalc-1",
+                         "Substantia nigra" =	"substantianigra",
+                         "Sigmoid" =	"colon_sigmoid",
+                         "Transverse" =	"colon_transverse",
+                         "Gastroesophageal junction" =	"esophagus_gastroesophageal_junction",
+                         "Mucosa" =	"esophagus_mucosa",
+                         "Muscularis" =	"esophagus_muscularis",
+                         "Atrial appendage" =	"heart_atrial_appendage",
+                         "Left ventricle" =	"heart_left_ventricle",
+                         "Kidney" =	"kidney_cortex",
+                         "Liver" =	"liver",
+                         "Lung" =	"lung",
+                         "Minor salivary gland" =	"minor_salivary_gland",
+                         "Skeletal muscle" =	"muscle_skeletal",
+                         "Nerve - tibial" =	"nerve_tibial",
+                         "Pancreas" =	"pancreas",
+                         "Pituitary" =	"pituitary",
+                         "Skin (suprapubic)" =	"skin_not_sun_exposed_suprapubic",
+                         "Skin (lower leg)"	= "skin_sun_exposed_lower_leg",
+                         "Small Intestine" =	"small_intestine_terminal_ileum",
+                         "Spleen" =	"spleen",
+                         "Stomach" =	"stomach",
+                         "Thyroid" =	"thyroid",
+                         "Whole blood" =	"whole_blood")
+
+tissue_GTEx_choices_alphabetical <- tissue_GTEx_choices[names(tissue_GTEx_choices) %>% order()]
+
+# Set WD ----------------------------------------------------------------------------------------------
+
+# OMIM_wd <- Sys.getenv("OMIM_wd")
+ setwd(".")
+
+# Functions -------------------------------------------------------------------------------------------
 
 source("global.R")
 
@@ -18,76 +72,30 @@ ui <- fluidPage(
   
   shinyjs::useShinyjs(),
   shiny::tags$head(
-	includeScript("https://www.googletagmanager.com/gtag/js?id=UA-129116044-1"),
-	shiny::tags$link(rel="shortcut icon", href="ucl-icon.png"),
-	shiny::tags$script(src = "google-analytics.js"),
-	shiny::tags$style(".shiny-output-error{padding-top: 10px;color: grey;}")
+    includeScript("https://www.googletagmanager.com/gtag/js?id=UA-129116044-1"),
+    shiny::tags$link(rel="shortcut icon", href="ucl-icon.png"),
+    shiny::tags$script(src = "google-analytics.js"),
+    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
   ),
   
-  navbarPage("Genomic Browser",
-             
-             tabPanel("Browser",
+  navbarPage(title = "Visualisation of Expressed Regions", 
+             tabPanel(title = "vizER",
                       # Application title
-                      titlePanel("David Zhang et al."),
-                      
-                      # Sidebar with a slider input for number of bins 
+                      titlePanel(title = "vizER"),
                       
                       sidebarLayout(
                         sidebarPanel(
-                          textInput(inputId = "geneid", label = "GeneID", value = "ENSG00000145335", width = NULL, placeholder = "Type gene ID"),
-                          selectInput("tissue", "Tissue:", choices = c("Brain Cerebellar Hemisphere" = "brain_cerebellar_hemisphere",
-                                                                       "Lung" = "lung",
-                                                                       "Frontal Cortex" = "frontalcortexba9",
-                                                                       "Adipose - subcutaneous" =	"adipose_subcutaneous",
-                                                                       "Adipose - visceral" =	"adipose_visceral_omentum",
-                                                                       "Adrenal gland" =	"adrenal_gland",
-                                                                       "Aorta" =	"artery_aorta",
-                                                                       "Artery - coronary" =	"artery_coronary",
-                                                                       "Artery - tibial" =	"artery_tibial",
-                                                                       "Amygdala" =	"amygdala",
-                                                                       "Anterior cingulate cortex" =	"anteriorcingulatecortexba24",
-                                                                       "Caudate" =	"caudatebasalganglia",
-                                                                       "Cerebellar hemisphere" =	"brain_cerebellar_hemisphere",
-                                                                       "Cerebellum" =	"brain_cerebellum",
-                                                                       "Cortex"	= "cortex",
-                                                                       "Frontal Cortex" =	"frontalcortexba9",
-                                                                       "Hippocampus" =	"hippocampus",
-                                                                       "Hypothalamus"	= "hypothalamus",
-                                                                       "Nucleus accumbens" =	"nucleusaccumbensbasalganglia",
-                                                                       "Putamen" =	"putamenbasalganglia",
-                                                                       "Spinal cord" =	"spinalcordcervicalc-1",
-                                                                       "Substantia nigra" =	"substantianigra",
-                                                                       "Sigmoid" =	"colon_sigmoid",
-                                                                       "Transverse" =	"colon_transverse",
-                                                                       "Gastroesophageal junction" =	"esophagus_gastroesophageal_junction",
-                                                                       "Mucosa" =	"esophagus_mucosa",
-                                                                       "Muscularis" =	"esophagus_muscularis",
-                                                                       "Atrial appendage" =	"heart_atrial_appendage",
-                                                                       "Left ventricle" =	"heart_left_ventricle",
-                                                                       "Kidney" =	"kidney_cortex",
-                                                                       "Liver" =	"liver",
-                                                                       "Lung" =	"lung",
-                                                                       "Minor salivary gland" =	"minor_salivary_gland",
-                                                                       "Skeletal muscle" =	"muscle_skeletal",
-                                                                       "Nerve - tibial" =	"nerve_tibial",
-                                                                       "Pancreas" =	"pancreas",
-                                                                       "Pituitary" =	"pituitary",
-                                                                       "Skin (suprapubic)" =	"skin_not_sun_exposed_suprapubic",
-                                                                       "Skin (lower leg)"	= "skin_sun_exposed_lower_leg",
-                                                                       "Small Intestine" =	"small_intestine_terminal_ileum",
-                                                                       "Spleen" =	"spleen",
-                                                                       "Stomach" =	"stomach",
-                                                                       "Thyroid" =	"thyroid",
-                                                                       "Whole blood" =	"whole_blood"),  multiple = T, selected = "brain_cerebellar_hemisphere"),
-                          numericInput(inputId = "propor_samples_split_read", label = "Propor. samples split read:", value = 0.05, step = 0.05, min = 0.05, max = 1),
-                          sliderInput(inputId = "extend_region_to_plot", label = "Extend region to plot:",
-                                      min = 1000, max = 50000, value = 1000, step = 500),
-                          checkboxInput("get_constraint", "Get constraint", FALSE),
-                          #checkboxInput("get_conserv", "Get conservation", FALSE),
-                          checkboxInput("all_split_reads", "All split read", FALSE),
+                          textInput(inputId = "geneid", label = "Gene ID", value = "ERLIN1", width = NULL, placeholder = "Enter gene of interest (ENSG ID or gene symbol)"),
+                          selectizeInput("tissue", "Tissue:", choices = tissue_GTEx_choices_alphabetical,  multiple = T, options = list(maxItems = 3), selected = "brain_cerebellar_hemisphere"),
+                          h5(strong("Extend region to plot:")),
+                          sliderInput(inputId = "extend_region_to_plot", label = checkboxInput("auto", "Auto", FALSE),min = 1000, max = 50000, value = 1000, step = 500),
+                          checkboxInput(inputId = "get_mean_cov", label = "Plot mean coverage", value = FALSE),
+                          checkboxInput(inputId = "get_conserv", label = "Plot conservation", value = FALSE),
+                          checkboxInput(inputId = "get_constraint", label = "Plot constraint", value = FALSE),
+                          textInput(inputId = "add_custom_annot_track", label = "SNP of interest:", value = "", 
+                                    width = NULL, placeholder = "e.g. chr10:100154922-100154922"),
                           actionButton("update", "Accept")
                         ),
-                        
                         # Show a plot of the generated distribution
                         mainPanel(
                           tabsetPanel(
@@ -101,169 +109,305 @@ ui <- fluidPage(
                                               singleton(
                                                 shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
                                                                                     function(message) {
-                                                                                    
-
-
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
-	$("#plot img").elevateZoom({
-		zoomWindowPosition:7,
-		zoomWindowWidth:250,
-		zoomWindowHeight:200//, 
-		//zoomLensWidth:75,
-		//zoomLensHeight:75
-	});
-}
-else{
-	$("#plot img").elevateZoom({
-		zoomWindowPosition:11,
-		zoomWindowWidth:450,
-		zoomWindowHeight:450,
-		scrollZoom:true
-	});
-}
+                                                                                    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
+                                                                                    $("#plot img").elevateZoom({
+                                                                                    zoomWindowPosition:7,
+                                                                                    zoomWindowWidth:250,
+                                                                                    zoomWindowHeight:200//, 
+                                                                                    //zoomLensWidth:75,
+                                                                                    //zoomLensHeight:75
+                                                                                    });
                                                                                     }
-                                                                  );'),
-                                                                 shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
-                                                                                    function(message) {
-                                                                                    $.removeData($("#plot img"), "elevateZoom");
-                                                                                    $(".zoomContainer").remove();
+                                                                                    else{
+                                                                                    $("#plot img").elevateZoom({
+                                                                                    zoomWindowPosition:11,
+                                                                                    zoomWindowWidth:450,
+                                                                                    zoomWindowHeight:450,
+                                                                                    scrollZoom:true
+                                                                                    });
                                                                                     }
-                                                                 );'),
-                                                                 shiny::tags$script('$(document).on("shiny:value", function(e) {
-                                                                                    console.log(e.name);
-                                                                                    if (e.name == "plot") {  // mytable is the name / id of the output element
-                                                                                    console.log(e.name);
-                                                                                    Shiny.onInputChange("startzoom", "");
-                                                                                    }});')
-                                                                 )),
+                                                                                    }
+                                                );'),
+                                                 shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
+                                                                    function(message) {
+                                                                    $.removeData($("#plot img"), "elevateZoom");
+                                                                    $(".zoomContainer").remove();
+                                                                    }
+                                                 );'),
+                                                 shiny::tags$script('$(document).on("shiny:value", function(e) {
+                                                                    console.log(e.name);
+                                                                    if (e.name == "plot") {  // mytable is the name / id of the output element
+                                                                    console.log(e.name);
+                                                                    Shiny.onInputChange("startzoom", "");
+                                                                    }});')
+                                                 )),
                                               
                                               imageOutput("plot")))),
-                            tabPanel(title = 'Summary',
+                            tabPanel(title = 'ER summary table',
                                      fluidRow(
                                        column(width = 12, 
                                               br(),  
                                               DT::dataTableOutput("summary")))),
-                            tabPanel(title = 'Download Data',
+                            tabPanel(title = 'Download',
                                      fluidRow(
                                        column(width = 12, 
                                               br(),
-                                              h2("Download page"),br(),
-                                              p("Please, press next button to download the plot in PNG format:"),
-                                              downloadButton(outputId = "download_plot", label = "Download Plot"), br(),br(),
-                                              p("Please, press next button to download new expressed regions in CSV format:"),
-                                              downloadButton(outputId = "download_data", label = "Download Data"))))
-                                     )))),
-             tabPanel("Paper",
-                      fluidPage( 
-                        titlePanel("Paper"),
-                        
+                                              h3("Download page"),br(),
+                                              p("Download plot in PNG format:"),
+                                              downloadButton(outputId = "download_plot", label = "Download"), br(),br(),
+                                              p("Download ER summary table in CSV format:"),
+                                              downloadButton(outputId = "download_data", label = "Download"), br(),br(),
+                                              p("Download ERs from each tissue in a BED format:"),
+                                              downloadButton(outputId = "download_bed", label = "Download"))))
+              )))),
+              tabPanel("About",
+                      titlePanel(title = "About"),
+                      fluidPage(
                         navlistPanel(
-                          "Sections",
-                          tabPanel("Abstract", fluidPage(
-                            h1("Abstract"),
-                            p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+                          tabPanel("Overview", fluidPage(
+                            h3("Overview"),
+                            p("Next-generation sequencing has equipped researchers to discover mutations across the entire genome. However, the knowledge required to decipher which of these mutations is causal for each patient’s disease is still incomplete at both gene and variant level, in particular for those mutations that fall into non-coding regions of the genome. We improve upon the existing annotation of majority of genes that are currently known to cause Mendelian disorders (OMIM genes) broadening the genetic horizon which can be used to prioritise variants and eventually, assign pathogenicity. With this in mind, we have developed this online web resource vizER with the primary goal of aiding clinical scientists and clinicians to visualise misannotations of any gene of interest, enabling better variant prioritisation and as a result, diagnosis of Mendelian disorders.")
                           )),
-                          tabPanel("Discussion", fluidPage(
-                            h1("Discussion"),
-                            p("Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"),
-                            p("Quod libris noster eum ne. Cetero recusabo sea at, duo laudem philosophia vituperatoribus et. Vide simul consul mea an, in audire diceret facilisi qui. An scripserit consequuntur sed, reque mandamus te duo. Pri dicunt dignissim concludaturque at, vix in eros oportere democritum, ut mel sint tation percipitur."),
-                            p("Pri in suas idque, in epicurei ocurreret est. Sea ut purto omittam signiferumque, sed ex suas libris. Unum labores eloquentiam ius in. Consequat intellegat constituto vis in."),
-                            p("Pro at iuvaret facilisis gubergren, sea id porro ullamcorper. Nisl meis vis cu. Mea brute fuisset te, modus deleniti et sea. Sit et autem dicit utroque, in sit justo laoreet."),
-                            p("Cu sea vocibus accommodare. Ius tempor omittantur te, ex mel nisl mundi eligendi. Tempor postea animal ea vim. Ut quo sapientem mnesarchum disputando, pro an quidam patrioque.")
+                          tabPanel("Publication", fluidPage(
+                            h3("Abstract"),
+                            p("Although the increasing use of whole-exome and whole-genome sequencing have improved the yield of genetic testing for Mendelian disorders, an estimated 50% of patients still leave the clinic without a genetic diagnosis. This can be is attributed in part to our lack of ability to accurately interpret the genetic variation detected through next-generation sequencing. Variant interpretation is fundamentally reliant on accurate and complete gene annotation, however numerous reports and discrepancies between gene annotation databases reveals that the knowledge of gene annotation remains far from comprehensive. Here, we detect and validate transcription in an annotation-agnostic manner across all 41 different GTEx tissues, then connect novel transcription to known genes, ultimately improving the annotation of 63% of the known OMIM-morbid genes. We find the majority of novel transcription to be tissue-specific in origin with brain tissues being most susceptible to misannotation. Furthermore, we find that novel transcribed regions tend to be poorly conserved, but are significantly depleted for genetic variation within humans suggesting they are functionally significant and potentially have human-specific functions. We present our findings through an online platform vizER, which enables individual genes to be visualised and queried for evidence of misannotation. We also release all tissue-specific transcriptomes in a BED format for ease of integration with whole-genome sequencing data. We anticipate that these resources will improve the diagnostic yield for a wide range of Mendelian disorders."), 
+                            a(href="", "link_to_paper")
                           )),
-                          tabPanel("Conclussions", fluidPage(
-                            h1("Conclussions"),
-                            p("Pri in suas idque, in epicurei ocurreret est. Sea ut purto omittam signiferumque, sed ex suas libris. Unum labores eloquentiam ius in. Consequat intellegat constituto vis in."),
-                            p("Pro at iuvaret facilisis gubergren, sea id porro ullamcorper. Nisl meis vis cu. Mea brute fuisset te, modus deleniti et sea. Sit et autem dicit utroque, in sit justo laoreet."),
-                            p("Cu sea vocibus accommodare. Ius tempor omittantur te, ex mel nisl mundi eligendi. Tempor postea animal ea vim. Ut quo sapientem mnesarchum disputando, pro an quidam patrioque."),
-                            p("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+                          tabPanel("Citation", fluidPage(
+                            h3("Citation"),
+                            p("To reference this resource please use:"), 
+                            p("ref_for_OMIM_paper")
                           ))
-                        ))),
+              ))),
              tabPanel("Help",
                       fluidRow(
                         column(12,
-                               h1("README"),
-                               p("This is a README detailing the columns of the data that are downloaded containing the ER definitions."),
-                               p("Expressed regions (ERs) are continous segments of the genome derived from the derfinder methodolody that have evidence of being transcribed."),
-                               p("ERs have been defined using RNA-sequencing data from 41 different GTEx tissues."),
-                               p("ERs are connected to known genes using split reads (those with a gapped alignment to the genome) with the overarching aim of improving existing gene annotation."),
-                               p("Each row represents 1 ER and each column details one property of the corresponding ER."),br(),
-                               h1("Annotated Properties"),
-                               tableOutput('annotated_properties'),br(),
-                               h1("Annotated Plot"),
-			       img(src = "annotated_plot.png",
+                               h1("Help"),
+                               p("Details of the parameters used as inputs and output plots and tables are described below:"),br(),
+                               # h1("Annotated Properties"),
+                               # tableOutput('annotated_properties'),br(),
+                               h3("Input parameters"),
+                               p("This is designed to allow you query individual genes of interest for misannotations from any of the 41 GTEx tissues and highlight a variant of interest if desired."),
+                               shiny::tags$table(id = "help-input-data",
+                                                 shiny::tags$tr(
+                                                   shiny::tags$th("Input name"),
+                                                   shiny::tags$th("Description")
+                                                   ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Gene ID"),
+                                                   shiny::tags$td("Gene symbol or Ensembl ID (based on version 92)")
+                                                   ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Tissue"),
+                                                   shiny::tags$td("Selection of which GTEx tissues to plot (maximum of 3 for each plot)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Extend region to plot"),
+                                                   shiny::tags$td("Expands the region to plot defaulting to the +/- 10% of the length of the gene of interest (Auto) or a numeric value between 1000-50,000 indicating the number of bps")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Plot mean coverage"),
+                                                   shiny::tags$td("Tick to plot the base-level read depth across the region (plotted as a log10 aggregated over every 25 bases)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Plot conservation"),
+                                                   shiny::tags$td("Tick to plot the conservation as phastCons7 across the region (aggregated over every 25 bases)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Plot constraint"),
+                                                   shiny::tags$td("Tick to plot the constraint as CDTS across the region (aggregated over every 25 bases)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("SNP(s) of interest"),
+                                                   shiny::tags$td("Input the coordinates of a SNP in the form chrXX:start-end of which to highlight (SNP must overlap the region to be plotted)")
+                                                 )
+                               ),br(),
+                               h3("Plot"),
+                               p("The plot is designed to help visualise a gene of interest and easily discern whether there are misannotations in potential regions of interest (e.g. overlap with a variant of unknown significance)."),
+                               img(src = "ERLIN1_OMIM_reannot_example_vizER_w_help.png", 
+                                   alt = "Annotated Plot",
                                    width = "100%",
-                                   alt = "Annotated Plot")
-			       #uiOutput("annotated")
-                        ))
-             ))
-  )
-
+                                   title = "Annotated Plot"),br(),
+                               h3("ER summary table"),
+                               p("The output table summarises the details of the ERs within the queried region. Each row corresponds to one ER and columns give the properties of each ER detailed below, allowing to easily query if a variant lies within any of the ERs."),
+                               shiny::tags$table(id = "help-output-data",
+                                                 shiny::tags$tr(
+                                                   shiny::tags$th("Input name"),
+                                                   shiny::tags$th("Description")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("ER_chr"),
+                                                   shiny::tags$td("Chromosome expressed region is found on (1-22,  X or Y)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("ER_start"),
+                                                   shiny::tags$td("Start position of expressed region (hg38)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("ER_end"),
+                                                   shiny::tags$td("End position of expressed region (hg38)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("ER_width"),
+                                                   shiny::tags$td("Total length in base pairs of expressed region")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Tissue"),
+                                                   shiny::tags$td("The tissue from which the RNA was extracted, sequenced and analysed to derive the ER")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Mean_coverage"),
+                                                   shiny::tags$td("A annotation agnostic measure of read depth (i.e. the mean number of reads overlapping each base of the ER averaged across all samples from the GTEx tissue)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Ensembl_grch38_v92_region_annot"),
+                                                   shiny::tags$td("which annotation features (exon,  intron,  intergenic) the ER overlaps according to Ensembl v92")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Misannot_type"),
+                                                   shiny::tags$td("The evidence by which the ER is connected to the gene of interest: 1) split_read - the ER has an overlapping split read connecting it to the gene of interest (a read with a gapped alignment to the genome), 2) overlap - the ER overlaps the gene of interest, 3) within_10Kb - the ER is within 10Kb of the gene of interest.")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Associated_gene"),
+                                                   shiny::tags$td("Ensembl ID of the gene of interest")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Overlap_any_gene_v92_name"),
+                                                   shiny::tags$td("Ensembl ID of the gene the expressed region overlaps")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Nearest_any_gene_v92_name"),
+                                                   shiny::tags$td("Ensembl ID of the gene the ER falls closest to in terms of genomic region")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Nearest_any_gene_v92_distance"),
+                                                   shiny::tags$td("The distance in bp to the nearest gene")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_annotation_type"),
+                                                   shiny::tags$td("A split read intersects with the ER and either the acceptor or donor overlaps with a known exon")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_to_any_gene"),
+                                                   shiny::tags$td("the Ensembl ID that the split read intersecting the ER connects to")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_ids"),
+                                                   shiny::tags$td("Recount2 IDs of any split reads overlapping the ER separated by a ';'")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_count_samp"),
+                                                   shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_propor_samp"),
+                                                   shiny::tags$td("Proportion of samples of that tissue that any split reads overlapping the ER are detected withinseparated by a ';'")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_starts"),
+                                                   shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Split_read_ends"),
+                                                   shiny::tags$td("End positions of any split reads overlapping the ER separated by a ';'")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Mean_CDTS_percentile"),
+                                                   shiny::tags$td("Mean percentile of constraint (tolerance of mutation using alignment of 7794 human genomes) across the ER (1 being the most constrained/highest evidence of functional role in humans)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Mean_phast_cons_7"),
+                                                   shiny::tags$td("Mean conservation (7 species) across the ER (0 - 1 with 1 being the most conserved)")
+                                                 ),
+                                                 shiny::tags$tr(
+                                                   shiny::tags$td("Mean_phast_cons_100"),
+                                                   shiny::tags$td("Mean conservation (100 species) across the ER (0 - 1 with 1 being the most conserved)")
+                                                 )
+                               ),br()
+                               # uiOutput("annotated")
+                        ))),
+             tabPanel("Contact",
+                      fluidRow(
+                        column(12,
+                               h3("Ryten Lab"),br(), 
+                               h4("This resource is generated by the Ryten Lab."),
+                               p("UCL Queen Square Institute of Neurology"),
+                               p("Office: 2nd floor, Russell Square House, 10-12 Russell Square, London  WC1B 5EH"),
+                               a(href="https://snca.atica.um.es/", "Visit us", target="_blank"),
+                               br(),br(),
+                               h4("For any questions related to this resource or publication please contact:"),
+                               p("Mina Ryten:",a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk")),
+                               p("Sebastian Guefi:",a(href="mailto:manuelsebastian.guelfi@gmail.com","manuelsebastian.guelfi@gmail.com")),
+                               p("David Zhang:", a(href="mailto:david.zhang.12@ucl.ac.uk","david.zhang.12@ucl.ac.uk"))
+                      )))
+  ),
+  div(class="modal")
+)
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
   ############################################################
   ##################### MAIN FUNCTION ########################
   ############################################################  
-
+  
   genePlot <- eventReactive(input$update, {
-
+    
     withProgress(message = 'Making plot...', value = 0.1, min = 0, max = 1, expr =  {
 
-        ######### DISABLE BUTTONS ###########
-        shinyjs::disable("update")
-        shinyjs::disable("download_plot")
-        shinyjs::disable("download_data")
-        
-        ######### STOP ZOOMING ###########
-        session$sendCustomMessage(type = 'stopzoom',
-                                  message = list())  
-        
-        #tryCatch({
-          ######### DAVID'S FUNCTIONS ###########
+      ######### BODY LOADING CLASS ###########
+      shinyjs::addCssClass(class = "loading", selector = "body")
+      
+      ######### DISABLE BUTTONS ###########
+      shinyjs::disable("download_plot")
+      shinyjs::disable("download_data")
+      shinyjs::disable("download_bed")
+      
+      
+      ######### STOP ZOOMING ###########
+      session$sendCustomMessage(type = 'stopzoom',
+                                message = list())  
+      
+      ######### DAVID'S FUNCTIONS ###########
 
-          visualise_ER_example(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                             txdb = ensembl_grch38_v92_genes_txdb, 
-                             ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
-                             gene_id = input$geneid,
-                             tissues_to_plot = input$tissue, 
-                             genome_build = input$genomebuild,
-                             gtex_split_read_table_mean_cov_df,
-                             tissue_optimal_cut_off_max_gap_df,
-                             get_constraint = input$get_constraint,
-                             get_conserv = F,#input$get_conserv,
-                             get_mean_cov = F,
-                             propor_samples_split_read = input$propor_samples_split_read,
-                             extend_region_to_plot = input$extend_region_to_plot,
-                             collapseTranscripts = "meta",
-                             transcriptAnnotation = "gene",
-                             aceview_annot = NULL,
-                             add_custom_annot_track = NULL,
-                             all_split_reads = input$all_split_reads)
-	
-            #},
-            #error = function(e) {
-              #print(paste("ERROR:",e))
-              shinyjs::enable("update")
-            #}
-          #)
-        data <- get_ER_table_to_display(ERs_w_annotation_df = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific, 
-                                        txdb = ensembl_grch38_v92_genes_txdb, 
-                                        ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
-                                        gene_id = input$geneid, 
-                                        tissues_to_plot = input$tissue,
-                                        gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
-                                        extend_region_to_plot = input$extend_region_to_plot)
-        ######### ENABLE BUTTONS ###########
-        shinyjs::enable("update")
-        shinyjs::enable("download_plot")
-        shinyjs::enable("download_data")
-	setProgress(value = 0.99)
-        
-        ######### RETURN DATA ###########
-        list(data = data)
+      visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, 
+                           txdb = ensembl_grch38_v92_genes_txdb, 
+                           ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                           gene_id = input$geneid,
+                           tissues_to_plot = input$tissue, 
+                           genome_build = input$genomebuild,
+                           gtex_split_read_table_mean_cov_df,
+                           tissue_optimal_cut_off_max_gap_df,
+                           get_constraint = input$get_constraint,
+                           get_conserv = input$get_conserv,
+                           get_mean_cov =  ifelse(length(input$tissue) == 1, input$get_mean_cov, FALSE),
+                           propor_samples_split_read = 0.05,
+                           extend_region_to_plot = ifelse(input$auto, "auto", input$extend_region_to_plot),
+                           collapseTranscripts = "meta",
+                           transcriptAnnotation = "gene",
+                           aceview_annot = NULL,
+                           add_custom_annot_track = input$add_custom_annot_track,
+                           all_split_reads = F)
+      
+      
+      data <- get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db = ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, 
+                                      txdb = ensembl_grch38_v92_genes_txdb, 
+                                      ensembl_gene_id_to_symbol_df = ensembl_gene_id_to_symbol_df_v92,
+                                      gene_id = input$geneid, 
+                                      tissues_to_plot = input$tissue,
+                                      gtex_split_read_table_mean_cov_df = gtex_split_read_table_mean_cov_df, 
+                                      extend_region_to_plot = input$extend_region_to_plot)
+      ######### ENABLE BUTTONS ###########
+      shinyjs::enable("download_plot")
+      shinyjs::enable("download_data")
+      setProgress(value = 0.99)
+
+      ######### BODY LOADING CLASS ###########
+      shinyjs::removeCssClass(class = "loading", selector = "body")
+      
+      ######### RETURN DATA ###########
+      list(data = data)
     })
-
+    
   })
   
   ##########################################################
@@ -273,9 +417,8 @@ server <- function(input, output, session) {
   validateData <- function(){
     validate(
       need(input$geneid, 'Please, type a gene.'),
-      need(input$tissue, 'Please, choose a tissue.'),
-      need(input$propor_samples_split_read, 'Please, type a split rate.')
-      )
+      need(input$tissue, 'Please, choose a tissue.')
+    )
   }
   
   
@@ -302,6 +445,25 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(input$auto, {
+    if(input$auto){
+      shinyjs::disable("extend_region_to_plot")
+    }
+    else
+      shinyjs::enable("extend_region_to_plot")
+  }, ignoreNULL = FALSE)
+  
+  observeEvent(input$tissue, {
+    if(length(input$tissue) == 1){
+      shinyjs::enable("get_mean_cov")
+    }
+    else{
+      shinyjs::disable("get_mean_cov")
+    }
+  }, ignoreNULL = FALSE)
+  
+  
+  
   
   ############################################################
   ################# BROWSER SECTION ##########################
@@ -312,10 +474,12 @@ server <- function(input, output, session) {
     validateData()
     shinyjs::disable("download_plot")
     shinyjs::disable("download_data")
+    shinyjs::disable("download_bed")
+    
     genePlot()
     shinyjs::enable("update")
-
-    list(src = "www/SNCA_OMIM_reannot_example.png",  
+    
+    list(src = "www/OMIM_reannot_plot.png",  
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
@@ -329,12 +493,12 @@ server <- function(input, output, session) {
   ######### DOWNLOAD TAB ###########
   output$download_plot = downloadHandler(
     filename = function() {
-      paste0(input$geneid,"-", Sys.time(), ".png", sep="")
+      paste0(input$geneid,"-", input$tissue, "-", Sys.time(), "vizER_plot.png", sep="")
     },
     content = function(file) { 
-      file.copy("www/SNCA_OMIM_reannot_example.png", file)
+      file.copy("www/OMIM_reannot_plot.png", file)
     },
-  contentType = "image/png"
+    contentType = "image/png"
   )   
   output$download_data <- 
     downloadHandler(
@@ -344,20 +508,6 @@ server <- function(input, output, session) {
       }
     )
   
-  ############################################################
-  ################# README SECTION ###########################
-  ############################################################
-  
-  output$annotated_properties <- renderTable({
-    tb <- read.csv(file = "./www/ERproperties.csv", header=T, sep=",")
-    return(tb)
-  })
-  #output$annotated <- renderUI({
-  #  img(src = "annotated_plot.png", 
-  #      width = "100%",
-  #      alt = "Annotated Plot")
-  #})
-
 }
 
 
@@ -367,5 +517,7 @@ onStart <- function() {
       file.remove("OMIM_plot.png")
   })
 }
+
 # Run the application 
 shinyApp(ui = ui, server = server, onStart = onStart)
+

@@ -1,1 +1,4 @@
-source("visualise_ER_example_gviz_v3.R")
+
+web_app <- T
+
+source("visualise_ER_example_gviz_web_app.R")

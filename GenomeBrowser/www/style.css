@@ -1,0 +1,43 @@
+.shiny-output-error{
+  padding-top: 10px;color: grey;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table td, th {
+  border: 1px solid #e7e7e7; /*#e7e7e7*/
+  text-align: left;
+  padding: 8px;
+}
+
+table tr:nth-child(even) {
+  background-color: #e7e7e7; /*#e7e7e7*/
+}
+
+p{
+  text-align: justify;
+}
+
+/******************************************/ 
+/******************************************/ 
+/*************** LOADING ******************/ 
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba( 255, 255, 255, .7 ) /*url('http://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat*/;
+}
+body.loading .modal {
+    overflow: hidden;
+}
+body.loading .modal {
+    display: block;
+}
