@@ -464,7 +464,10 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     
   }else{
     
-    if(web_app){ png(output_image_path, res = 600, width = 10, height = 11.69/2, units = "in") }
+    if(web_app){ 
+	png(output_image_path, res = 600, width = 10, height = 11.69/2, units = "in") 
+	png("www/OMIM_reannot_mobile_plot.png", res = 600, width = 7.5, height = 11.69/3, units = "in")
+    }
     plotTracks(trackList = all_annot_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.5, fontsize = 7, 
                sizes = all_annot_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
     

@@ -28,14 +28,15 @@ proxy:
   #  display-name: vizER
   #  container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
   #  container-image: vizer_shinyproxy_v2
-  #- id: vizER_complete
-  #  display-name: vizER (complete)
-  #  container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
-  #  container-image: vizer_shinyproxy_v2_complete
-  - id: vizER_small
-    display-name: vizER (small)
+  - id: vizER
+    display-name: vizER
     container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
-    container-image: vizer_shinyproxy_v2_small
+    container-image: vizerv2
+    container-volumes: [ "/home_2/gsit/vizER_data:/root/vizER/vizER_data" ]
+  - id: vizER_test
+    display-name: vizER_test
+    container-cmd: ["R", "-e", "shiny::runApp('/root/vizER')"]
+    container-image: vizer_test
     container-volumes: [ "/home_2/gsit/vizER_data:/root/vizER/vizER_data" ]
   #  access-groups: rytenlab
 logging:

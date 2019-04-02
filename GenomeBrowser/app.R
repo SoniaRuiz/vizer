@@ -75,6 +75,105 @@ ui <- fluidPage(
     includeScript("https://www.googletagmanager.com/gtag/js?id=UA-129116044-1"),
     shiny::tags$link(rel="shortcut icon", href="ucl-icon.png"),
     shiny::tags$script(src = "google-analytics.js"),
+
+    shiny::tags$script('$( document ).ready(function() {
+      /**********************************************************/
+      /**** REDIRECT PARENT (in order to avoid iframe issue) ****/
+      /**********************************************************/
+      var path = $("#shinyframe", window.parent.document).attr("src");
+    	if(path != undefined)
+    		window.top.location.href = path;
+    });'),
+   
+
+
+
+   shiny::tags$script('$(document).ready(function(){
+  $(window).resize(function(){
+    var $zoomImg = $("#plot img");
+	var height = $zoomImg.height();
+
+	$(".zoomWrapper").css("height", height);
+	$(".zoomContainer .zoomWindow").css({"height": height});
+
+	$.removeData($("#plot img"), "elevateZoom");
+	$(".zoomContainer").remove();
+
+	
+	if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
+	$("#plot img").elevateZoom({
+	zoomWindowPosition:7,
+	zoomWindowWidth:height/2,
+	zoomWindowHeight:height/2,
+	responsive:true
+	//zoomLensWidth:75,
+	//zoomLensHeight:75
+	});
+	}
+	else{
+	$("#plot img").elevateZoom({
+	zoomWindowPosition:11,
+	zoomWindowWidth:height,
+	zoomWindowHeight:height,
+	scrollZoom:true,
+	responsive:true
+	});
+	}
+  });
+});'),
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
   ),
   
@@ -113,7 +212,8 @@ ui <- fluidPage(
                                                                                     $("#plot img").elevateZoom({
                                                                                     zoomWindowPosition:7,
                                                                                     zoomWindowWidth:250,
-                                                                                    zoomWindowHeight:200//, 
+                                                                                    zoomWindowHeight:200, 
+										    responsive:true
                                                                                     //zoomLensWidth:75,
                                                                                     //zoomLensHeight:75
                                                                                     });
@@ -123,7 +223,8 @@ ui <- fluidPage(
                                                                                     zoomWindowPosition:11,
                                                                                     zoomWindowWidth:450,
                                                                                     zoomWindowHeight:450,
-                                                                                    scrollZoom:true
+                                                                                    scrollZoom:true,
+										    responsive:true
                                                                                     });
                                                                                     }
                                                                                     }
@@ -153,12 +254,17 @@ ui <- fluidPage(
                                        column(width = 12, 
                                               br(),
                                               h3("Download page"),br(),
+                                              h4("Plot"),
                                               p("Download plot in PNG format:"),
                                               downloadButton(outputId = "download_plot", label = "Download"), br(),br(),
+                                              h4("ER summary table"),
                                               p("Download ER summary table in CSV format:"),
                                               downloadButton(outputId = "download_data", label = "Download"), br(),br(),
-                                              p("Download ERs from each tissue in a BED format:"),
+                                              h4("ERs from each tissue"),
+                                              p("If you would like to obtain the ERs from each tissue please contact Mina Ryten (",a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk"),")."),
+                                              p("We are working on making this data suitable for distribution. It will be ready soon."),
                                               downloadButton(outputId = "download_bed", label = "Download"))))
+
               )))),
               tabPanel("About",
                       titlePanel(title = "About"),
@@ -171,13 +277,13 @@ ui <- fluidPage(
                           tabPanel("Publication", fluidPage(
                             h3("Abstract"),
                             p("Although the increasing use of whole-exome and whole-genome sequencing have improved the yield of genetic testing for Mendelian disorders, an estimated 50% of patients still leave the clinic without a genetic diagnosis. This can be is attributed in part to our lack of ability to accurately interpret the genetic variation detected through next-generation sequencing. Variant interpretation is fundamentally reliant on accurate and complete gene annotation, however numerous reports and discrepancies between gene annotation databases reveals that the knowledge of gene annotation remains far from comprehensive. Here, we detect and validate transcription in an annotation-agnostic manner across all 41 different GTEx tissues, then connect novel transcription to known genes, ultimately improving the annotation of 63% of the known OMIM-morbid genes. We find the majority of novel transcription to be tissue-specific in origin with brain tissues being most susceptible to misannotation. Furthermore, we find that novel transcribed regions tend to be poorly conserved, but are significantly depleted for genetic variation within humans suggesting they are functionally significant and potentially have human-specific functions. We present our findings through an online platform vizER, which enables individual genes to be visualised and queried for evidence of misannotation. We also release all tissue-specific transcriptomes in a BED format for ease of integration with whole-genome sequencing data. We anticipate that these resources will improve the diagnostic yield for a wide range of Mendelian disorders."), 
-                            a(href="", "link_to_paper")
-                          )),
-                          tabPanel("Citation", fluidPage(
-                            h3("Citation"),
-                            p("To reference this resource please use:"), 
-                            p("ref_for_OMIM_paper")
-                          ))
+                            a(href="https://www.biorxiv.org/content/10.1101/499103v1", target="_blank","Read more")
+                          ))#,
+                          #tabPanel("Citation", fluidPage(
+                          #  h3("Citation"),
+                          #  p("To reference this resource please use:"), 
+                          #  p("ref_for_OMIM_paper")
+                          #))
               ))),
              tabPanel("Help",
                       fluidRow(
@@ -338,7 +444,10 @@ ui <- fluidPage(
                                h4("For any questions related to this resource or publication please contact:"),
                                p("Mina Ryten:",a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk")),
                                p("Sebastian Guefi:",a(href="mailto:manuelsebastian.guelfi@gmail.com","manuelsebastian.guelfi@gmail.com")),
-                               p("David Zhang:", a(href="mailto:david.zhang.12@ucl.ac.uk","david.zhang.12@ucl.ac.uk"))
+                               p("David Zhang:", a(href="mailto:david.zhang.12@ucl.ac.uk","david.zhang.12@ucl.ac.uk")),
+				p("Sonia Garcia-Ruiz:", a(href="mailto:s.ruiz@ucl.ac.uk","s.ruiz@ucl.ac.uk"))
+
+
                       )))
   ),
   div(class="modal")
@@ -426,6 +535,15 @@ server <- function(input, output, session) {
   ####################### OBSERVERS ##########################
   ############################################################  
   
+  observe({
+	cdata <- parseQueryString(session$clientData$url_search)
+	if (!is.null(cdata[['gene']])) {
+		updateTextInput(session, "geneid", value = cdata[['gene']])
+	}
+
+  })
+
+
   observeEvent(input$startzoom,{
     session$sendCustomMessage(type = 'startzoom', message = list())
   })
@@ -479,7 +597,7 @@ server <- function(input, output, session) {
     genePlot()
     shinyjs::enable("update")
     
-    list(src = "www/OMIM_reannot_plot.png",  
+    list(src = "www/OMIM_reannot_mobile_plot.png",  
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
@@ -496,7 +614,7 @@ server <- function(input, output, session) {
       paste0(input$geneid,"-", input$tissue, "-", Sys.time(), "vizER_plot.png", sep="")
     },
     content = function(file) { 
-      file.copy("www/OMIM_reannot_plot.png", file)
+      file.copy("www/OMIM_reannot_mobile_plot.png", file)
     },
     contentType = "image/png"
   )   
