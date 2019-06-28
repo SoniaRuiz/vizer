@@ -16,10 +16,17 @@ if(!web_app){
 
 # Load data -------------------------------------------------------------------------------------------
 
-# need to be changed by sonia 
-mean_coverage_path <- "/root/vizER/vizER_data/by_tissue_smfrze_use_me/"
-path_to_data_folder <- "/root/vizER/vizER_data/"
-output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
+################## need to be modified depending on running on MR server or murcia ################## 
+
+# mean_coverage_path <- "/root/vizER/vizER_data/by_tissue_smfrze_use_me/"
+# path_to_data_folder <- "/root/vizER/vizER_data/"
+# output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
+
+mean_coverage_path <- "/data/recount/GTEx_SRP012682/gtex_mean_coverage/by_tissue_smfrze_use_me/"
+path_to_data_folder <- "/home/sruiz/R/data/"
+output_image_path <- "www/OMIM_reannot_plot.png"
+
+#####################################################################################################
 
 constraint_grs_split_by_chr_paths_df <- 
   data_frame(paths = list.files(str_c(path_to_data_folder, "constraint_grs_split_by_chr/"), full.names = T), 
@@ -63,7 +70,7 @@ get_gtex_split_read_table_mean_cov_n_samples_df <- function(gtex_tissue_name_for
                  list.files(mean_coverage_path, full.names = F) %>% 
                  str_replace("brain", "") %>% 
                  str_replace_all("_", ""))
-
+  
   gtex_split_read_table_mean_cov_df <- 
     gtex_split_read_table_df %>% 
     inner_join(gtex_mean_cov_df) %>% 
@@ -164,8 +171,8 @@ get_ER_table_to_display <- function(ERs_w_annotation_all_tissues_width_ab_3_no_c
     ERs_w_annotation_df_to_display_tissue_filtered <- ERs_w_annotation_df_to_display %>% filter(tissue == tissue_to_plot)
     
     load(gtex_split_read_table_mean_cov_df %>% 
-         filter(OMIM_gtex_name == tissue_to_plot) %>% 
-         .[["gtex_split_read_table_annotated_paths"]])
+           filter(OMIM_gtex_name == tissue_to_plot) %>% 
+           .[["gtex_split_read_table_annotated_paths"]])
     
     tissue_n <- 
       gtex_split_read_table_mean_cov_df %>% 
@@ -174,7 +181,7 @@ get_ER_table_to_display <- function(ERs_w_annotation_all_tissues_width_ab_3_no_c
     
     ERs_w_annotation_df_to_display_tissue_filtered_w_split_read_details <- 
       get_split_read_info_for_ER_details_df(ERs_w_annotation_df_to_display_tissue_filtered, tissue_n, gtex_split_read_table_annotated_only_junc_coverage)
-      
+    
     ERs_w_annotation_df_to_display_w_split_read_data <- 
       ERs_w_annotation_df_to_display_w_split_read_data %>% 
       bind_rows(ERs_w_annotation_df_to_display_tissue_filtered_w_split_read_details)
@@ -182,12 +189,12 @@ get_ER_table_to_display <- function(ERs_w_annotation_all_tissues_width_ab_3_no_c
   }
   
   ERs_w_annotation_df_to_display_w_split_read_data <- 
-  ERs_w_annotation_df_to_display_w_split_read_data %>% 
-  dplyr::select(ER_chr = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, misannot_type, associated_gene,
-                overlap_any_gene_v92_name, nearest_any_gene_v92_name, nearest_any_gene_v92_distance, 
-                split_read_annotation_type = annotationType_split_read_annot, annotationType_split_read_annot, split_read_to_any_gene = uniq_genes_split_read_annot,
-                split_read_count_samp, split_read_propor_samp, split_read_starts, split_read_ends,
-                mean_CDTS_percentile, mean_phast_cons_7, mean_phast_cons_100)
+    ERs_w_annotation_df_to_display_w_split_read_data %>% 
+    dplyr::select(ER_chr = seqnames, ER_start = start, ER_end = end, ER_width = width, tissue, mean_coverage = value, ensembl_grch38_v92_region_annot, misannot_type, associated_gene,
+                  overlap_any_gene_v92_name, nearest_any_gene_v92_name, nearest_any_gene_v92_distance, 
+                  split_read_annotation_type = annotationType_split_read_annot, annotationType_split_read_annot, split_read_to_any_gene = uniq_genes_split_read_annot,
+                  split_read_ids = p_annot_junc_ids_split_read_annot, split_read_count_samp, split_read_propor_samp, split_read_starts, split_read_ends,
+                  mean_CDTS_percentile, mean_phast_cons_7, mean_phast_cons_100)
   
   return(ERs_w_annotation_df_to_display_w_split_read_data)
   
@@ -231,10 +238,10 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
   }else{
     
     ensembl_gene_id_to_symbol_df_dup <- 
-    ensembl_gene_id_to_symbol_df %>%
+      ensembl_gene_id_to_symbol_df %>%
       filter(!duplicated(external_gene_name), # removing instances whereby 2 ensembl ids match onto 1 
              external_gene_name == gene_id)
-  
+    
     if(nrow(ensembl_gene_id_to_symbol_df_dup) == 0){
       
       stop(str_c(gene_id, " not found in the ensembl database (v92)"))
@@ -281,7 +288,7 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
   }
   
   if(web_app){ setProgress(value = 0.18) }
-
+  
   filtered_ERs_sql <- glue_sql('SELECT * FROM ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific WHERE "seqnames" == ({seqname*})  AND "start" >= ({start*}) AND "end" <= ({end*}) AND "tissue" IN ({tissues*})',
                                seqname = seqnames_to_plot,
                                start = start_to_plot,
@@ -376,7 +383,7 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
       all_annot_tracks <- c(all_annot_tracks, gr_track_aceview)
       
     }
-
+    
     
   }
   
@@ -446,13 +453,13 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     add_custom_annot_track_gr <- GRanges(add_custom_annot_track)
     
     add_custom_annot_track_overlaps <- findOverlaps(add_custom_annot_track_gr, GRanges(str_c(seqnames_to_plot, ":", 
-                                                                                          start_to_plot, "-", 
-                                                                                          end_to_plot)))
+                                                                                             start_to_plot, "-", 
+                                                                                             end_to_plot)))
     
     if(length(queryHits(add_custom_annot_track_overlaps)) != length(add_custom_annot_track)) stop("some custom track SNPs do not overlap with region to plot")
     
     all_annot_tracks_highlighted <- HighlightTrack(trackList = all_annot_tracks, range = add_custom_annot_track_gr)
-
+    
     if(web_app){ png(output_image_path, res = 600, width = 10, height = 11.69/2, units = "in") }
     
     plotTracks(trackList = all_annot_tracks_highlighted, from = start_to_plot, to = end_to_plot, title.width = 0.5, fontsize = 7, 
@@ -465,8 +472,8 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
   }else{
     
     if(web_app){ 
-	png(output_image_path, res = 600, width = 10, height = 11.69/2, units = "in") 
-	png("www/OMIM_reannot_mobile_plot.png", res = 600, width = 7.5, height = 11.69/3, units = "in")
+      png(output_image_path, res = 600, width = 10, height = 11.69/2, units = "in") 
+      png("www/OMIM_reannot_mobile_plot.png", res = 600, width = 7.5, height = 11.69/3, units = "in")
     }
     plotTracks(trackList = all_annot_tracks, from = start_to_plot, to = end_to_plot, title.width = 0.5, fontsize = 7, 
                sizes = all_annot_tracks %>% lapply(FUN = function(x){ displayPars(x)$size}) %>% unlist())
@@ -476,9 +483,9 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     if(web_app){ dev.off() }
     
   }
-
-
-            
+  
+  
+  
 }
 
 ##### Second level #####
@@ -593,7 +600,7 @@ merge_ER_split_read_tracks <- function(tissues_to_plot, annot_track_ERs_all_tiss
     ER_split_tracks_ordered_per_tissue <- 
       list(d_track_split_read_overlayed_all_tissues[[tissue_to_plot]], 
            annot_track_ERs_all_tissues[[tissue_to_plot]][["annot"]], annot_track_ERs_all_tissues[[tissue_to_plot]][["unannot"]])
-           
+    
     
     ER_split_tracks_ordered_all_tissues <- c(ER_split_tracks_ordered_all_tissues, ER_split_tracks_ordered_per_tissue)
     
@@ -621,9 +628,17 @@ get_data_track_mean_cov <- function(gtex_split_read_table_mean_cov_df, tissues_t
   
   load(gtex_mean_cov_path_chr)
   
-  range_to_plot_gr$meanCoverage <- log(tissue_coverage_w_mean_normalised$meanCoverage[range_to_plot_ir], base = 10)
+  mean_cov_no_0 <- tissue_coverage_w_mean_normalised$meanCoverage[range_to_plot_ir][tissue_coverage_w_mean_normalised$meanCoverage[range_to_plot_ir] != 0]
   
-  d_track_mean_cov <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "fixed", windowSize = 25)
+  range_to_plot_gr$meanCoverage <- ifelse(tissue_coverage_w_mean_normalised$meanCoverage[range_to_plot_ir] == 0, 
+                                          min(mean_cov_no_0), tissue_coverage_w_mean_normalised$meanCoverage[range_to_plot_ir])
+  
+  range_to_plot_gr$meanCoverage <- log10(range_to_plot_gr$meanCoverage)
+  
+  y_max <- max(range_to_plot_gr$meanCoverage)
+  y_min <- min(range_to_plot_gr$meanCoverage)
+  
+  d_track_mean_cov <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "auto", ylim = c(y_min, y_max))
   
   # plotTracks(d_track_mean_cov, from = start_to_plot, to = end_to_plot)
   
@@ -637,7 +652,8 @@ get_data_track_mean_cov <- function(gtex_split_read_table_mean_cov_df, tissues_t
   
   range_to_plot_gr$cut_off <- tissue_optimal_cut_off_max_gap_df_cutoff
   
-  d_track_mean_cov_cut_off <- DataTrack(range_to_plot_gr, type = "a", lty = 2, col = "red", type = "a", aggregation = "mean", window = "auto")
+  d_track_mean_cov_cut_off <- DataTrack(range_to_plot_gr, type = "a", lty = 2, col = "red", type = "a", aggregation = "mean", window = "auto", windowSize = 25,
+                                        ylim = c(y_min, y_max))
   
   d_track_mean_cov_w_cut_off <- OverlayTrack(trackList = list(d_track_mean_cov, d_track_mean_cov_cut_off), name = "MC", 
                                              size = 1, background.title = "black")
@@ -675,17 +691,17 @@ get_data_track_constraint <- function(seqnames_to_plot, start_to_plot, end_to_pl
 get_dummy_track_titles <- function(all_annot_tracks, gtex_split_read_table_mean_cov_df){
   
   name_size_track_class_list <- 
-  all_annot_tracks %>% lapply(FUN = function(x){
-    
-    y <- x %>% displayPars()
-    
-    name_size_track_df <- data_frame(track_name = names(x), 
-                                     track_size = y[[c("size")]], 
-                                     track_type = class(x))
-    
-    return(name_size_track_df)
-    
-  })
+    all_annot_tracks %>% lapply(FUN = function(x){
+      
+      y <- x %>% displayPars()
+      
+      name_size_track_df <- data_frame(track_name = names(x), 
+                                       track_size = y[[c("size")]], 
+                                       track_type = class(x))
+      
+      return(name_size_track_df)
+      
+    })
   
   name_size_track_df <- 
     do.call("bind_rows", name_size_track_class_list) %>% 
@@ -698,11 +714,11 @@ get_dummy_track_titles <- function(all_annot_tracks, gtex_split_read_table_mean_
   list_dummy_tracks <- list()
   
   for(i in 1:nrow(name_size_track_df)){
-  
+    
     track_name_to_plot <- name_size_track_df$track_name[i] %>% as.character()
     track_size_to_plot <- name_size_track_df$total_track_size[i]
     track_type_to_plot <- name_size_track_df$track_type[i]
-      
+    
     list_dummy_tracks[[i]] <- 
       DataTrack(GRanges("chrY:69-69"), genome = "hg38", 
                 size = track_size_to_plot, 
@@ -710,7 +726,7 @@ get_dummy_track_titles <- function(all_annot_tracks, gtex_split_read_table_mean_
                 showTitle = T, 
                 name = track_name_to_plot, 
                 background.title = "black")
-
+    
     displayPars(list_dummy_tracks[[i]])
     
   }
@@ -728,7 +744,7 @@ get_split_read_info_for_ER_details_df <- function(ERs_w_annotation_df_to_display
                                                               split_read_ends = as.integer(NA))
   
   gtex_split_read_table_annotated_only_junc_coverage_int_jun_id <- 
-      gtex_split_read_table_annotated_only_junc_coverage %>% as_tibble() %>% mutate(junID = junID %>% as.integer()) %>% arrange(junID)
+    gtex_split_read_table_annotated_only_junc_coverage %>% as_tibble() %>% mutate(junID = junID %>% as.integer()) %>% arrange(junID)
   
   for(j in 1:nrow(ERs_w_annotation_df_to_display_tissue_filtered_w_split_read_details)){
     
@@ -742,7 +758,7 @@ get_split_read_info_for_ER_details_df <- function(ERs_w_annotation_df_to_display
     }else{
       
       gtex_split_read_table_annotated_only_junc_coverage_int_jun_id_filtered <- 
-      gtex_split_read_table_annotated_only_junc_coverage_int_jun_id %>% 
+        gtex_split_read_table_annotated_only_junc_coverage_int_jun_id %>% 
         filter(junID %in% p_annot_junc_ids_split_reads_int)
       
       ERs_w_annotation_df_to_display_tissue_filtered_w_split_read_details$split_read_count_samp[j] <- 
@@ -760,9 +776,9 @@ get_split_read_info_for_ER_details_df <- function(ERs_w_annotation_df_to_display
     }
     
   }
-
+  
   return(ERs_w_annotation_df_to_display_tissue_filtered_w_split_read_details)
-    
+  
 }
 
 
@@ -835,7 +851,7 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
                                      ifelse(junID %in% unannot_ERs_jun_ids, "unannot", "none")),
            annot_unannot_split_read = ifelse(precBoundDonor == T | precBoundAcceptor == T, "p_annot", "unannot"),
            propor_samples = countsSamples/tissue_n) %>%
-    filter(!(annot_unannot_ER == "none" & precBoundDonor == T & precBoundAcceptor == T))
+    filter(!(annot_unannot_ER == "none" & precBoundDonor == T & precBoundAcceptor == T), propor_samples >= propor_samples_split_read)
   
   d_track_split_read_all <- list()
   
@@ -899,45 +915,45 @@ aceview_hg38_txdb <-
                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 
-# ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
-# txdb <- ensembl_grch38_v92_genes_txdb
-# ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-# gene_id <- "ERLIN1"
-# tissues_to_plot <- c("brain_cerebellar_hemisphere")
-# genome_build <- "hg38"
-# get_constraint <- T
-# get_conserv <- T
-# get_mean_cov <- T
-# propor_samples_split_read <- 0.05
-# extend_region_to_plot <- "auto"
-# collapseTranscripts <-  "meta"
-# transcriptAnnotation <-  "gene"
-# aceview_annot <- NULL
-# add_custom_annot_track <- "chr10:100154922-100154922"
-# all_split_reads <- F
-# 
-# ERs_w_annotation_df_to_display_w_split_read_data <-
-#   get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
-#                           tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
-# 
-# visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
-#                      txdb,
-#                      ensembl_gene_id_to_symbol_df,
-#                      gene_id,
-#                      tissues_to_plot,
-#                      genome_build,
-#                      gtex_split_read_table_mean_cov_df,
-#                      tissue_optimal_cut_off_max_gap_df,
-#                      get_constraint,
-#                      get_conserv,
-#                      get_mean_cov,
-#                      propor_samples_split_read,
-#                      extend_region_to_plot,
-#                      collapseTranscripts,
-#                      transcriptAnnotation,
-#                      aceview_annot,
-#                      add_custom_annot_track,
-#                      all_split_reads)
-# 
-# dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
+ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
+txdb <- ensembl_grch38_v92_genes_txdb
+ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+gene_id <- "C19orf12"
+tissues_to_plot <- c("brain_cerebellum")
+genome_build <- "hg38"
+get_constraint <- T
+get_conserv <- T
+get_mean_cov <- T
+propor_samples_split_read <- 0.05
+extend_region_to_plot <- "1000"
+collapseTranscripts <-  "meta"
+transcriptAnnotation <-  "gene"
+aceview_annot <- NULL
+add_custom_annot_track <- "chr10:100154922-100154922"
+all_split_reads <- F
+
+ERs_w_annotation_df_to_display_w_split_read_data <-
+  get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
+                          tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
+
+visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
+                     txdb,
+                     ensembl_gene_id_to_symbol_df,
+                     gene_id,
+                     tissues_to_plot,
+                     genome_build,
+                     gtex_split_read_table_mean_cov_df,
+                     tissue_optimal_cut_off_max_gap_df,
+                     get_constraint,
+                     get_conserv,
+                     get_mean_cov,
+                     propor_samples_split_read,
+                     extend_region_to_plot,
+                     collapseTranscripts,
+                     transcriptAnnotation,
+                     aceview_annot,
+                     add_custom_annot_track,
+                     all_split_reads)
+
+dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
 
