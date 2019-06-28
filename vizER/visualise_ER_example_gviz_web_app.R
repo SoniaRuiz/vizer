@@ -915,45 +915,45 @@ aceview_hg38_txdb <-
                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 
-# ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
-# txdb <- ensembl_grch38_v92_genes_txdb
-# ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-# gene_id <- "ERLIN1"
-# tissues_to_plot <- c("brain_cerebellar_hemisphere")
-# genome_build <- "hg38"
-# get_constraint <- T
-# get_conserv <- T
-# get_mean_cov <- T
-# propor_samples_split_read <- 0.05
-# extend_region_to_plot <- "auto"
-# collapseTranscripts <-  "meta"
-# transcriptAnnotation <-  "gene"
-# aceview_annot <- NULL
-# add_custom_annot_track <- "chr10:100154922-100154922"
-# all_split_reads <- F
-# 
-# ERs_w_annotation_df_to_display_w_split_read_data <-
-#   get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
-#                           tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
-# 
-# visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
-#                      txdb,
-#                      ensembl_gene_id_to_symbol_df,
-#                      gene_id,
-#                      tissues_to_plot,
-#                      genome_build,
-#                      gtex_split_read_table_mean_cov_df,
-#                      tissue_optimal_cut_off_max_gap_df,
-#                      get_constraint,
-#                      get_conserv,
-#                      get_mean_cov,
-#                      propor_samples_split_read,
-#                      extend_region_to_plot,
-#                      collapseTranscripts,
-#                      transcriptAnnotation,
-#                      aceview_annot,
-#                      add_custom_annot_track,
-#                      all_split_reads)
-# 
-# dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
+ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
+txdb <- ensembl_grch38_v92_genes_txdb
+ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+gene_id <- "C19orf12"
+tissues_to_plot <- c("brain_cerebellum")
+genome_build <- "hg38"
+get_constraint <- T
+get_conserv <- T
+get_mean_cov <- T
+propor_samples_split_read <- 0.05
+extend_region_to_plot <- "1000"
+collapseTranscripts <-  "meta"
+transcriptAnnotation <-  "gene"
+aceview_annot <- NULL
+add_custom_annot_track <- "chr10:100154922-100154922"
+all_split_reads <- F
+
+ERs_w_annotation_df_to_display_w_split_read_data <-
+  get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
+                          tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
+
+visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
+                     txdb,
+                     ensembl_gene_id_to_symbol_df,
+                     gene_id,
+                     tissues_to_plot,
+                     genome_build,
+                     gtex_split_read_table_mean_cov_df,
+                     tissue_optimal_cut_off_max_gap_df,
+                     get_constraint,
+                     get_conserv,
+                     get_mean_cov,
+                     propor_samples_split_read,
+                     extend_region_to_plot,
+                     collapseTranscripts,
+                     transcriptAnnotation,
+                     aceview_annot,
+                     add_custom_annot_track,
+                     all_split_reads)
+
+dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
 
