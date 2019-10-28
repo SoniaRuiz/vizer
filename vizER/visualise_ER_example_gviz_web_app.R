@@ -4,8 +4,11 @@ library(Gviz)
 library(ggpubr)
 library(regioneR)
 library(glue)
+library(RSQLite)
 
 # Set WD ----------------------------------------------------------------------------------------------
+
+# web_app <- F
 
 if(!web_app){ 
   
@@ -23,7 +26,7 @@ if(!web_app){
 # output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
 
 mean_coverage_path <- "/data/recount/GTEx_SRP012682/gtex_mean_coverage/by_tissue_smfrze_use_me/"
-path_to_data_folder <- "/home/sruiz/R/data/"
+path_to_data_folder <- "/home/sruiz/PROJECTS/vizER/data/"
 output_image_path <- "www/OMIM_reannot_plot.png"
 
 #####################################################################################################
@@ -904,22 +907,22 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 
 # Main ------------------------------------------------------------------------------------------------
 
-# gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
-# 
-# ensembl_grch38_v92_genes_txdb <- 
-#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"), 
-#                          output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
-#                          seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
-# 
-# aceview_hg38_txdb <- 
-#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"), 
+gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
+
+ensembl_grch38_v92_genes_txdb <-
+  generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"),
+                         output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
+                         seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
+
+# aceview_hg38_txdb <-
+#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"),
 #                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
 #                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 # 
 # ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
 # txdb <- ensembl_grch38_v92_genes_txdb
 # ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-# gene_id <- "C19orf12"
+# gene_id <- "ERLIN1"
 # tissues_to_plot <- c("brain_cerebellum")
 # genome_build <- "hg38"
 # get_constraint <- T
