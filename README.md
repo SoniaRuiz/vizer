@@ -22,6 +22,6 @@ For further information about this publication, please visit [this](https://www.
 
 ## Acknowledgments
 
-* All [RytenLab](https://snca.atica.um.es/) members
+* All [RytenLab](https://snca.atica.um.es/RytenLab/Team) members
 * [University College of London](https://www.ucl.ac.uk/)
 * [University of Murcia](https://www.um.es/)
