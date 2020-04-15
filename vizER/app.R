@@ -124,56 +124,6 @@ ui <- fluidPage(
 
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
 ),
 
@@ -249,11 +199,11 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                      column(width = 12, 
                                             br(),  
                                             DT::dataTableOutput("summary")))),
-                          tabPanel(title = 'Download',
+                          tabPanel(title = 'Data',
                                    fluidRow(
                                      column(width = 12, 
                                             br(),
-                                            h3("Download page"),br(),
+                                            h3("Plot data download"),br(),
                                             h4("Plot"),
                                             p("Download plot in PNG format:"),
                                             downloadButton(outputId = "download_plot", label = "Download"), br(),br(),
@@ -261,11 +211,47 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                             p("Download ER summary table in CSV format:"),
                                             downloadButton(outputId = "download_data", label = "Download"), br(),br(),
                                             h4("ERs from each tissue"),
-                                            p("If you would like to obtain the ERs from each tissue please contact Mina Ryten (",a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk"),")."),
+                                            p("If you would like to obtain the ERs from each tissue, please contact Mina Ryten (",a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk"),")."),
                                             p("We are working on making this data suitable for distribution. It will be ready soon."),
                                             downloadButton(outputId = "download_bed", label = "Download"))))
                           
                                    )))),
+           tabPanel("Download",
+                    fluidRow(
+                      column(12,
+                             h1("Download"),
+                             p("Below are links and descriptions to download expressed region data associated with the publication:",
+                               a(href="https://www.biorxiv.org/content/10.1101/499103v2", "Incomplete annotation of disease-associated genes is limiting our understanding of Mendelian and complex neurogenetic disorders", target="_blank"), ".", br(), "Comments describing the contents of the columns can be found on top of each file."),br(),
+                             h3("Data"),
+                             shiny::tags$table(id = "download-paper-data",
+                                               shiny::tags$tr(
+                                                 shiny::tags$th("File name"),
+                                                 shiny::tags$th("Description"),
+                                                 shiny::tags$th("Download")
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("ERs_prot_coding_potential.csv.gz"),
+                                                 shiny::tags$td("The novel ERs that are supported by 2 split/junction reads, connected to a gene and have protein coding potential. Most relevant for diagnostic use."),
+                                                 shiny::tags$td(downloadButton(outputId = "d_coding_potential", label = "Download"))
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("ERs_2_split_read_1_gene_high_confidence.csv.gz"),
+                                                 shiny::tags$td("The novel ERs that supported by 2 split/junction reads, connected to a gene."),
+                                                 shiny::tags$td(downloadButton(outputId = "d_high_confidence", label = "Download"))
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("ERs_1_split_read_1_gene.csv.gz"),
+                                                 shiny::tags$td("The novel ERs that have 1 split read, connected to a gene."),
+                                                 shiny::tags$td(downloadButton(outputId = "d_1_gene", label = "Download"))
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("all_ERs.csv.gz"),
+                                                 shiny::tags$td("ERs defined from 41 GTEx tissues that have contributed to the analysis."),
+                                                 shiny::tags$td(downloadButton(outputId = "d_all_ERs", label = "Download"))
+                                               )
+                             ),br()
+                             # uiOutput("annotated")
+                      ))),
            tabPanel("About",
                     titlePanel(title = "About"),
                     fluidPage(
@@ -606,7 +592,7 @@ server <- function(input, output, session) {
     genePlot()$data
   })
   
-  ######### DOWNLOAD TAB ###########
+  ######### DOWNLOAD PLOT TAB ###########
   output$download_plot = downloadHandler(
     filename = function() {
       paste0(input$geneid,"-", input$tissue, "-", Sys.time(), "vizER_plot.png", sep="")
@@ -623,6 +609,36 @@ server <- function(input, output, session) {
         write.csv(genePlot()$data,file)
       }
     )
+  
+  ######### DOWNLOAD UPPTER TAB ###########
+  output$d_coding_potential = downloadHandler(
+    filename = "ERs_prot_coding_potential.csv.gz",
+    content = function(file) { 
+      file.copy("www/ERs_prot_coding_potential.csv.gz", file)
+    },
+    contentType = "application/gzip"
+  )   
+  output$d_high_confidence <- downloadHandler(
+    filename = "ERs_2_split_read_1_gene_high_confidence.csv.gz",
+    content = function(file) { 
+      file.copy("www/ERs_2_split_read_1_gene_high_confidence.csv.gz", file)
+    },
+    contentType = "application/gzip"
+  )
+  output$d_1_gene <- downloadHandler(
+    filename = "ERs_1_split_read_1_gene.csv.gz",
+    content = function(file) { 
+      file.copy("www/ERs_1_split_read_1_gene.csv.gz", file)
+    },
+    contentType = "application/gzip"
+  )
+  output$d_all_ERs <- downloadHandler(
+    filename = "all_ERs.csv.gz",
+    content = function(file) { 
+      file.copy("www/all_ERs.csv.gz", file)
+    },
+    contentType = "application/gzip"
+  )
   
 }
 
