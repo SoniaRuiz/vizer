@@ -141,6 +141,7 @@ navbarPage(title = "Visualisation of Expressed Regions",
                         checkboxInput(inputId = "get_mean_cov", label = "Plot mean coverage", value = FALSE),
                         checkboxInput(inputId = "get_conserv", label = "Plot conservation", value = FALSE),
                         checkboxInput(inputId = "get_constraint", label = "Plot constraint", value = FALSE),
+                        checkboxInput(inputId = "get_CNC_scores", label = "Plot CNC scores", value = FALSE),
                         textInput(inputId = "add_custom_annot_track", label = "SNP of interest:", value = "", 
                                   width = NULL, placeholder = "e.g. chr10:100154922-100154922"),
                         actionButton("update", "Accept")
@@ -248,6 +249,11 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                  shiny::tags$td("all_ERs.csv.gz"),
                                                  shiny::tags$td("ERs defined from 41 GTEx tissues that have contributed to the analysis."),
                                                  shiny::tags$td(downloadButton(outputId = "d_all_ERs", label = "Download"))
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("genes_cutoff1_most_constrained_w_density.rda.gz"),
+                                                 shiny::tags$td("TODO: add description."),
+                                                 shiny::tags$td(downloadButton(outputId = "d_genes_cutoff1", label = "Download"))
                                                )
                              ),br()
                              # uiOutput("annotated")
@@ -472,6 +478,7 @@ server <- function(input, output, session) {
                            tissue_optimal_cut_off_max_gap_df,
                            get_constraint = input$get_constraint,
                            get_conserv = input$get_conserv,
+                           get_conserv_constraint_ratio = input$get_CNC_scores,
                            get_mean_cov =  ifelse(length(input$tissue) == 1, input$get_mean_cov, FALSE),
                            propor_samples_split_read = 0.05,
                            extend_region_to_plot = ifelse(input$auto, "auto", input$extend_region_to_plot),
@@ -636,6 +643,13 @@ server <- function(input, output, session) {
     filename = "all_ERs.csv.gz",
     content = function(file) { 
       file.copy("www/all_ERs.csv.gz", file)
+    },
+    contentType = "application/gzip"
+  )
+  output$d_genes_cutoff1 <- downloadHandler(
+    filename = "genes_cutoff1_most_constrained_w_density.rda.gz",
+    content = function(file) { 
+      file.copy("www/genes_cutoff1_most_constrained_w_density.rda.gz", file)
     },
     contentType = "application/gzip"
   )

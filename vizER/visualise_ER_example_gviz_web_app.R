@@ -980,17 +980,6 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 
 # Main ------------------------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-# gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
-# 
-# ensembl_grch38_v92_genes_txdb <- 
-#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"), 
-#                          output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
-#                          seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
-# 
-# aceview_hg38_txdb <- 
-#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"), 
-=======
 gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
 
 ensembl_grch38_v92_genes_txdb <-
@@ -1005,18 +994,13 @@ constraint_conserv_ratio_split_by_chr_paths_df <-
 
 # aceview_hg38_txdb <-
 #   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"),
->>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 #                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
 #                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 # 
 # ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
 # txdb <- ensembl_grch38_v92_genes_txdb
 # ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-<<<<<<< HEAD
-# gene_id <- "C19orf12"
-=======
 # gene_id <- "APOE"
->>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # tissues_to_plot <- c("brain_cerebellum")
 # genome_build <- "hg38"
 # get_constraint <- T
@@ -1027,14 +1011,9 @@ constraint_conserv_ratio_split_by_chr_paths_df <-
 # collapseTranscripts <-  "meta"
 # transcriptAnnotation <-  "gene"
 # aceview_annot <- NULL
-<<<<<<< HEAD
-# add_custom_annot_track <- "chr10:100154922-100154922"
-# all_split_reads <- F
-=======
 # add_custom_annot_track <- NULL #"chr10:100154922-100154922"
 # all_split_reads <- F
 # get_conserv_constraint_ratio <- T
->>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # 
 # ERs_w_annotation_df_to_display_w_split_read_data <-
 #   get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
@@ -1057,12 +1036,7 @@ constraint_conserv_ratio_split_by_chr_paths_df <-
 #                      transcriptAnnotation,
 #                      aceview_annot,
 #                      add_custom_annot_track,
-<<<<<<< HEAD
-#                      all_split_reads)
-=======
 #                      all_split_reads,
 #                      get_conserv_constraint_ratio)
->>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # 
 # dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
-
