@@ -4,8 +4,11 @@ library(Gviz)
 library(ggpubr)
 library(regioneR)
 library(glue)
+library(RSQLite)
 
 # Set WD ----------------------------------------------------------------------------------------------
+
+# web_app <- F
 
 if(!web_app){ 
   
@@ -223,7 +226,7 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
                                  propor_samples_split_read = 0.05, extend_region_to_plot = "auto", 
                                  collapseTranscripts, transcriptAnnotation, 
                                  aceview_annot = NULL, add_custom_annot_track = NULL, 
-                                 all_split_reads = F){
+                                 all_split_reads = F, get_conserv_constraint_ratio = F){
   
   ##### convert symbol to ENSG ID #####
   
@@ -438,6 +441,21 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     # plotTracks(d_track_constraint, from = start_to_plot, to = end_to_plot) 
     
     all_annot_tracks <- c(all_annot_tracks, d_track_constraint)
+    
+  }
+  
+  ##### Data track - constraint conserv ratio #####
+  
+  if(get_conserv_constraint_ratio == T){
+    
+    d_track_constraint_conserv <- get_data_track_constraint_conserv_ratio(seqnames_to_plot, 
+                                                                          start_to_plot, 
+                                                                          end_to_plot, 
+                                                                          constraint_conserv_ratio_split_by_chr_paths_df)
+    
+    # plotTracks(d_track_constraint, from = start_to_plot, to = end_to_plot) 
+    
+    all_annot_tracks <- c(all_annot_tracks, d_track_constraint_conserv)
     
   }
   
@@ -689,6 +707,64 @@ get_data_track_constraint <- function(seqnames_to_plot, start_to_plot, end_to_pl
   
 }
 
+get_data_track_constraint_conserv_ratio <- function(seqnames_to_plot, start_to_plot, end_to_plot, constraint_conserv_ratio_split_by_chr_paths_df){
+  
+  load(constraint_conserv_ratio_split_by_chr_paths_df %>% 
+         filter(chr == seqnames_to_plot) %>% 
+         .[["paths"]])
+  
+  annot_CDTS_cons_rank_chr_start_end_filtered_gr <- 
+    annot_CDTS_cons_rank_all_chr_chr_filtered %>%
+    filter(start >= start_to_plot, 
+           end <= end_to_plot, 
+           Rank_minus_CDTS >= 206633452) %>% 
+    dplyr::select(seqnames, start, end, Log2Ratio_CDTS_cons) %>% 
+    as.data.frame() %>% 
+    toGRanges()
+  
+  all_bp_in_region <- GRanges(str_c(seqnames(annot_CDTS_cons_rank_chr_start_end_filtered_gr) %>% unique(), 
+                                    ":", min(start(annot_CDTS_cons_rank_chr_start_end_filtered_gr)):max(end(annot_CDTS_cons_rank_chr_start_end_filtered_gr)), 
+                                    "-", min(start(annot_CDTS_cons_rank_chr_start_end_filtered_gr)):max(end(annot_CDTS_cons_rank_chr_start_end_filtered_gr))))
+  
+  hits <- findOverlaps(annot_CDTS_cons_rank_chr_start_end_filtered_gr, all_bp_in_region)
+  bp_not_in_CDTS <- all_bp_in_region[!(1:length(all_bp_in_region) %in% subjectHits(hits))]
+  bp_not_in_CDTS$Log2Ratio_CDTS_cons <- 1
+  annot_CDTS_cons_rank_chr_start_end_filtered_gr <- c(annot_CDTS_cons_rank_chr_start_end_filtered_gr, bp_not_in_CDTS)
+  
+  y_max <- max(annot_CDTS_cons_rank_chr_start_end_filtered_gr$Log2Ratio_CDTS_cons)
+  y_min <- min(annot_CDTS_cons_rank_chr_start_end_filtered_gr$Log2Ratio_CDTS_cons)
+  
+  d_track_constraint_conserv <- DataTrack(annot_CDTS_cons_rank_chr_start_end_filtered_gr, 
+                                          type = "polygon", 
+                                          aggregation = "mean", 
+                                          window = "fixed",  
+                                          windowSize = 20, 
+                                          col = "black",
+                                          fill.mountain = c("white", ggpubr::get_palette("npg", 2)[1]),
+                                          lwd.mountain = 1,
+                                          lwd = 0, 
+                                          baseline = 1,
+                                          background.title = "black",
+                                          name = "CNCR Score", 
+                                          size = 1, 
+                                          ylim = c(y_min, y_max))
+  
+  # plotTracks(d_track_constraint_conserv)
+  
+  annot_CDTS_cons_rank_chr_start_end_filtered_gr$Log2Ratio_CDTS_cons <- NULL
+  annot_CDTS_cons_rank_chr_start_end_filtered_gr$cut_off <- 1
+  
+  d_track_constraint_conserv_x_cut_off <- DataTrack(annot_CDTS_cons_rank_chr_start_end_filtered_gr, 
+                                                    type = "a", lty = 2, col = "black", type = "a", aggregation = "mean", 
+                                                    ylim = c(y_min, y_max))
+  
+  d_track_constraint_conserv_w_cut_off <- OverlayTrack(trackList = list(d_track_constraint_conserv, d_track_constraint_conserv_x_cut_off), name = "ratio", 
+                                                       size = 1, background.title = "black")
+  
+  return(d_track_constraint_conserv_w_cut_off)
+  
+}
+
 get_dummy_track_titles <- function(all_annot_tracks, gtex_split_read_table_mean_cov_df){
   
   name_size_track_class_list <- 
@@ -904,6 +980,7 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 
 # Main ------------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 # gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
 # 
 # ensembl_grch38_v92_genes_txdb <- 
@@ -913,13 +990,33 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 # 
 # aceview_hg38_txdb <- 
 #   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"), 
+=======
+gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
+
+ensembl_grch38_v92_genes_txdb <-
+  generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"),
+                         output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
+                         seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
+
+constraint_conserv_ratio_split_by_chr_paths_df <-
+  data_frame(paths = list.files(str_c(path_to_data_folder, "/CNC_scores"), full.names = T),
+             chr = paths %>% str_replace(".*annot_CDTS_cons_rank_", "") %>%
+               str_replace("\\.rda", ""))
+
+# aceview_hg38_txdb <-
+#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"),
+>>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 #                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
 #                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
 # 
 # ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
 # txdb <- ensembl_grch38_v92_genes_txdb
 # ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+<<<<<<< HEAD
 # gene_id <- "C19orf12"
+=======
+# gene_id <- "APOE"
+>>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # tissues_to_plot <- c("brain_cerebellum")
 # genome_build <- "hg38"
 # get_constraint <- T
@@ -930,8 +1027,14 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 # collapseTranscripts <-  "meta"
 # transcriptAnnotation <-  "gene"
 # aceview_annot <- NULL
+<<<<<<< HEAD
 # add_custom_annot_track <- "chr10:100154922-100154922"
 # all_split_reads <- F
+=======
+# add_custom_annot_track <- NULL #"chr10:100154922-100154922"
+# all_split_reads <- F
+# get_conserv_constraint_ratio <- T
+>>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # 
 # ERs_w_annotation_df_to_display_w_split_read_data <-
 #   get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
@@ -954,7 +1057,12 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 #                      transcriptAnnotation,
 #                      aceview_annot,
 #                      add_custom_annot_track,
+<<<<<<< HEAD
 #                      all_split_reads)
+=======
+#                      all_split_reads,
+#                      get_conserv_constraint_ratio)
+>>>>>>> 55405dd93009cbc5172610b2f1b4d6a048f02e0e
 # 
 # dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
 
