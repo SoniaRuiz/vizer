@@ -23,7 +23,7 @@ if(!web_app){
 # output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
 
 mean_coverage_path <- "/data/recount/GTEx_SRP012682/gtex_mean_coverage/by_tissue_smfrze_use_me/"
-path_to_data_folder <- "/home/sruiz/R/data/"
+path_to_data_folder <- "/home/sruiz/PROJECTS/vizER/data/"
 output_image_path <- "www/OMIM_reannot_plot.png"
 
 #####################################################################################################
@@ -124,18 +124,19 @@ get_ER_table_to_display <- function(ERs_w_annotation_all_tissues_width_ab_3_no_c
   
   gene_cord <- ensembl_grch38_v92_genes_txdb_genes[ensembl_grch38_v92_genes_txdb_genes$gene_id == ensembl_gene_id]
   seqnames_to_plot <- as.character(seqnames(gene_cord))
-  
+
   if(extend_region_to_plot == "auto"){
     
     extend_region_to_plot_auto <- width(gene_cord)/10
+    
     start_to_plot <- (start(gene_cord) - extend_region_to_plot_auto)
     end_to_plot <- (end(gene_cord) + extend_region_to_plot_auto)
     bp_plotted <- end_to_plot - start_to_plot
     
   }else{
     
-    start_to_plot <- (start(gene_cord) - extend_region_to_plot)
-    end_to_plot <- (end(gene_cord) + extend_region_to_plot)
+    start_to_plot <- (start(gene_cord) - as.double(extend_region_to_plot))
+    end_to_plot <- (end(gene_cord) +  as.double(extend_region_to_plot))
     bp_plotted <- end_to_plot - start_to_plot
     
   }
@@ -281,8 +282,8 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     
   }else{
     
-    start_to_plot <- (start(gene_cord) - extend_region_to_plot)
-    end_to_plot <- (end(gene_cord) + extend_region_to_plot)
+    start_to_plot <- (start(gene_cord) - as.double(extend_region_to_plot))
+    end_to_plot <- (end(gene_cord) + as.double(extend_region_to_plot))
     bp_plotted <- end_to_plot - start_to_plot
     
   }
@@ -823,8 +824,8 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
       gtex_split_read_table_annotated_only_junc_coverage %>% 
       as_tibble() %>% 
       filter(chr == seqnames(gene_cord) %>% str_replace("chr", ""),
-             start >= (start(gene_cord) - extend_region_to_plot), 
-             stop <= (end(gene_cord) + extend_region_to_plot), 
+             start >= (start(gene_cord) - as.double(extend_region_to_plot)), 
+             stop <= (end(gene_cord) + as.double(extend_region_to_plot)), 
              strand == strand(gene_cord) %>% as.character())
     
   }else{
@@ -903,57 +904,57 @@ get_data_track_split_read_per_tissue <- function(ERs_w_annotation_df_to_plot_tis
 
 # Main ------------------------------------------------------------------------------------------------
 
-gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
-
-ensembl_grch38_v92_genes_txdb <- 
-  generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"), 
-                         output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
-                         seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
-
-aceview_hg38_txdb <- 
-  generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"), 
-                         output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
-                         seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
-
-ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
-txdb <- ensembl_grch38_v92_genes_txdb
-ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-gene_id <- "C19orf12"
-tissues_to_plot <- c("brain_cerebellum")
-genome_build <- "hg38"
-get_constraint <- T
-get_conserv <- T
-get_mean_cov <- T
-propor_samples_split_read <- 0.05
-extend_region_to_plot <- "1000"
-collapseTranscripts <-  "meta"
-transcriptAnnotation <-  "gene"
-aceview_annot <- NULL
-add_custom_annot_track <- "chr10:100154922-100154922"
-all_split_reads <- F
-
-ERs_w_annotation_df_to_display_w_split_read_data <-
-  get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
-                          tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
-
-visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
-                     txdb,
-                     ensembl_gene_id_to_symbol_df,
-                     gene_id,
-                     tissues_to_plot,
-                     genome_build,
-                     gtex_split_read_table_mean_cov_df,
-                     tissue_optimal_cut_off_max_gap_df,
-                     get_constraint,
-                     get_conserv,
-                     get_mean_cov,
-                     propor_samples_split_read,
-                     extend_region_to_plot,
-                     collapseTranscripts,
-                     transcriptAnnotation,
-                     aceview_annot,
-                     add_custom_annot_track,
-                     all_split_reads)
-
-dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
+# gtex_split_read_table_mean_cov_df <- get_gtex_split_read_table_mean_cov_n_samples_df(gtex_tissue_name_formatting)
+# 
+# ensembl_grch38_v92_genes_txdb <- 
+#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "Homo_sapiens.GRCh38.92.gtf"), 
+#                          output_path = str_c(path_to_data_folder, "ensembl_grch38_v92_txdb.sqlite"),
+#                          seq_levels_to_keep = c(1:22, "X", "Y", "MT"), genome_build = "hg38")
+# 
+# aceview_hg38_txdb <- 
+#   generate_txDb_from_gtf(gtf_gff3_path = str_c(path_to_data_folder, "AceView.ncbi_37.genes_gff.gff"), 
+#                          output_path = str_c(path_to_data_folder, "aceview_hg38_txdb.sqlite"),
+#                          seq_levels_to_keep = c(1:22, "X", "Y"), genome_build = "hg19", convert_hg19_to_hg38 = T)
+# 
+# ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
+# txdb <- ensembl_grch38_v92_genes_txdb
+# ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
+# gene_id <- "C19orf12"
+# tissues_to_plot <- c("brain_cerebellum")
+# genome_build <- "hg38"
+# get_constraint <- T
+# get_conserv <- T
+# get_mean_cov <- T
+# propor_samples_split_read <- 0.05
+# extend_region_to_plot <- "1000"
+# collapseTranscripts <-  "meta"
+# transcriptAnnotation <-  "gene"
+# aceview_annot <- NULL
+# add_custom_annot_track <- "chr10:100154922-100154922"
+# all_split_reads <- F
+# 
+# ERs_w_annotation_df_to_display_w_split_read_data <-
+#   get_ER_table_to_display(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db, txdb, ensembl_gene_id_to_symbol_df, gene_id,
+#                           tissues_to_plot, gtex_split_read_table_mean_cov_df, extend_region_to_plot)
+# 
+# visualise_ER_example(ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db,
+#                      txdb,
+#                      ensembl_gene_id_to_symbol_df,
+#                      gene_id,
+#                      tissues_to_plot,
+#                      genome_build,
+#                      gtex_split_read_table_mean_cov_df,
+#                      tissue_optimal_cut_off_max_gap_df,
+#                      get_constraint,
+#                      get_conserv,
+#                      get_mean_cov,
+#                      propor_samples_split_read,
+#                      extend_region_to_plot,
+#                      collapseTranscripts,
+#                      transcriptAnnotation,
+#                      aceview_annot,
+#                      add_custom_annot_track,
+#                      all_split_reads)
+# 
+# dev.print(file = "/home/dzhang/projects/OMIM_wd/OMIM_paper/web_application/ERLIN1_OMIM_reannot_example_vizER.png", device = png, res = 600, width = 10, height = 11.69/2, units = "in")
 
