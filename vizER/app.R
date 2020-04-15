@@ -611,7 +611,7 @@ server <- function(input, output, session) {
   )   
   output$download_data <- 
     downloadHandler(
-      filename = "data.csv",
+      filename = "ER_summary_table_vizER.csv",
       content = function(file){
         write.csv(genePlot()$data,file)
       }
