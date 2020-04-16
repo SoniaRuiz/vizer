@@ -252,7 +252,7 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("genes_cutoff1_most_constrained_w_density.rda.gz"),
-                                                 shiny::tags$td("TODO: add description."),
+                                                 shiny::tags$td("Table of genes within the constrained, non-conserved regions (CNCRs) annotation with density of CNCRs per gene (Ensembl v.92)."),
                                                  shiny::tags$td(downloadButton(outputId = "d_genes_cutoff1", label = "Download"))
                                                )
                              ),br()
