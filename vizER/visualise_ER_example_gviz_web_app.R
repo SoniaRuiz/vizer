@@ -422,7 +422,7 @@ visualise_ER_example <- function(ERs_w_annotation_all_tissues_width_ab_3_no_cell
     )
     
     d_track_conserv <- DataTrack(range_to_plot_gr_conserv, type = "a", aggregation = "mean", window = "fixed", windowSize = 25, background.title = "black",
-                                 name = "PC7", size = 1)
+                                 name = "PC7", size = 1, col = get_palette("npg", 4)[3])
     
     # plotTracks(d_track_conserv, from = start_to_plot, to = end_to_plot)
     
@@ -657,7 +657,8 @@ get_data_track_mean_cov <- function(gtex_split_read_table_mean_cov_df, tissues_t
   y_max <- max(range_to_plot_gr$meanCoverage)
   y_min <- min(range_to_plot_gr$meanCoverage)
   
-  d_track_mean_cov <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "auto", ylim = c(y_min, y_max))
+  d_track_mean_cov <- DataTrack(range_to_plot_gr, type = "a", aggregation = "mean", window = "auto", ylim = c(y_min, y_max), 
+                                col = get_palette("npg", 4)[2])
   
   # plotTracks(d_track_mean_cov, from = start_to_plot, to = end_to_plot)
   
@@ -671,7 +672,7 @@ get_data_track_mean_cov <- function(gtex_split_read_table_mean_cov_df, tissues_t
   
   range_to_plot_gr$cut_off <- tissue_optimal_cut_off_max_gap_df_cutoff
   
-  d_track_mean_cov_cut_off <- DataTrack(range_to_plot_gr, type = "a", lty = 2, col = "red", type = "a", aggregation = "mean", window = "auto", windowSize = 25,
+  d_track_mean_cov_cut_off <- DataTrack(range_to_plot_gr, type = "a", lty = 2, col = get_palette("npg", 4)[2], type = "a", aggregation = "mean", window = "auto", windowSize = 25,
                                         ylim = c(y_min, y_max))
   
   d_track_mean_cov_w_cut_off <- OverlayTrack(trackList = list(d_track_mean_cov, d_track_mean_cov_cut_off), name = "MC", 
@@ -699,7 +700,8 @@ get_data_track_constraint <- function(seqnames_to_plot, start_to_plot, end_to_pl
   
   d_track_constraint <- DataTrack(CDTS_percentile_N7794_unrelated_one_chr_gr_region_filtered, 
                                   type = "a", aggregation = "mean", window = "fixed", windowSize = 25, background.title = "black",
-                                  name = "CDTS", size = 1)
+                                  name = "CDTS", size = 1, 
+                                  col = get_palette("npg", 4)[4])
   
   # plotTracks(d_track_constraint, from = start_to_plot, to = end_to_plot) 
   
@@ -739,7 +741,7 @@ get_data_track_constraint_conserv_ratio <- function(seqnames_to_plot, start_to_p
                                           aggregation = "mean", 
                                           window = "fixed",  
                                           windowSize = 20, 
-                                          col = "black",
+                                          col = get_palette("npg", 4)[1],
                                           fill.mountain = c("white", ggpubr::get_palette("npg", 2)[1]),
                                           lwd.mountain = 1,
                                           lwd = 0, 
@@ -755,10 +757,10 @@ get_data_track_constraint_conserv_ratio <- function(seqnames_to_plot, start_to_p
   annot_CDTS_cons_rank_chr_start_end_filtered_gr$cut_off <- 1
   
   d_track_constraint_conserv_x_cut_off <- DataTrack(annot_CDTS_cons_rank_chr_start_end_filtered_gr, 
-                                                    type = "a", lty = 2, col = "black", type = "a", aggregation = "mean", 
+                                                    type = "a", lty = 2, col = get_palette("npg", 4)[1], type = "a", aggregation = "mean", 
                                                     ylim = c(y_min, y_max))
   
-  d_track_constraint_conserv_w_cut_off <- OverlayTrack(trackList = list(d_track_constraint_conserv, d_track_constraint_conserv_x_cut_off), name = "ratio", 
+  d_track_constraint_conserv_w_cut_off <- OverlayTrack(trackList = list(d_track_constraint_conserv, d_track_constraint_conserv_x_cut_off), name = "CNC", 
                                                        size = 1, background.title = "black")
   
   return(d_track_constraint_conserv_w_cut_off)
@@ -1000,7 +1002,7 @@ constraint_conserv_ratio_split_by_chr_paths_df <-
 # ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db <- ERs_w_annotation_all_tissues_width_ab_3_no_cells_sex_specific_db
 # txdb <- ensembl_grch38_v92_genes_txdb
 # ensembl_gene_id_to_symbol_df <- ensembl_gene_id_to_symbol_df_v92
-# gene_id <- "APOE"
+# gene_id <- "ERLIN1"
 # tissues_to_plot <- c("brain_cerebellum")
 # genome_build <- "hg38"
 # get_constraint <- T
@@ -1011,7 +1013,7 @@ constraint_conserv_ratio_split_by_chr_paths_df <-
 # collapseTranscripts <-  "meta"
 # transcriptAnnotation <-  "gene"
 # aceview_annot <- NULL
-# add_custom_annot_track <- NULL #"chr10:100154922-100154922"
+# add_custom_annot_track <- "chr10:100154922-100154922"
 # all_split_reads <- F
 # get_conserv_constraint_ratio <- T
 # 
