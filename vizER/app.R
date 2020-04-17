@@ -89,40 +89,49 @@ ui <- fluidPage(
     
     
     shiny::tags$script('$(document).ready(function(){
-                       $(window).resize(function(){
-                       var $zoomImg = $("#plot img");
-                       var height = $zoomImg.height();
-                       
-                       $(".zoomWrapper").css("height", height);
-                       $(".zoomContainer .zoomWindow").css({"height": height});
-                       
-                       $.removeData($("#plot img"), "elevateZoom");
-                       $(".zoomContainer").remove();
-                       
-                       
-                       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
-                       $("#plot img").elevateZoom({
-                       zoomWindowPosition:7,
-                       zoomWindowWidth:height/2,
-                       zoomWindowHeight:height/2,
-                       responsive:true
-                       //zoomLensWidth:75,
-                       //zoomLensHeight:75
-                       });
-                       }
-                       else{
-                       $("#plot img").elevateZoom({
-                       zoomWindowPosition:11,
-                       zoomWindowWidth:height,
-                       zoomWindowHeight:height,
-                       scrollZoom:true,
-                       responsive:true
-                       });
-                       }
-                       });
+                        $(window).resize(function(){
+                        var $zoomImg = $("#plot img");
+                        var height = $zoomImg.height();
+                        
+                        $(".zoomWrapper").css("height", height);
+                        $(".zoomContainer .zoomWindow").css({"height": height});
+                        
+                        $.removeData($("#plot img"), "elevateZoom");
+                        $(".zoomContainer").remove();
+                        
+                        
+                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
+                        $("#plot img").elevateZoom({
+                        zoomWindowPosition:7,
+                        zoomWindowWidth:height/2,
+                        zoomWindowHeight:height/2,
+                        responsive:true
+                        //zoomLensWidth:75,
+                        //zoomLensHeight:75
+                        });
+                        }
+                        else{
+                        $("#plot img").elevateZoom({
+                        zoomWindowPosition:11,
+                        zoomWindowWidth:height,
+                        zoomWindowHeight:height,
+                        scrollZoom:true,
+                        responsive:true
+                        });
+                        }
+                        });
+
+                        //Only show the zoomContainer tab when clicking the vizER upper tab
+                        $("ul.navbar-nav li a").click(function() {
+                          if($(this).text() != "vizER"){
+                            $(".zoomContainer").hide()
+                          }else{
+                            $(".zoomContainer").show()
+                          }
+                        });
+
                        });'),
 
-    
     
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
 ),
@@ -179,20 +188,20 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                                                   });
                                                                                   }
                                                                                   }
-                                              );'),
-                                                 shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
+                                                                                  );'),
+                                                  shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
                                                                     function(message) {
                                                                     $.removeData($("#plot img"), "elevateZoom");
                                                                     $(".zoomContainer").remove();
                                                                     }
-                                                 );'),
-                                                 shiny::tags$script('$(document).on("shiny:value", function(e) {
+                                                  );'),
+                                                  shiny::tags$script('$(document).on("shiny:value", function(e) {
                                                                     console.log(e.name);
                                                                     if (e.name == "plot") {  // mytable is the name / id of the output element
                                                                     console.log(e.name);
                                                                     Shiny.onInputChange("startzoom", "");
                                                                     }});')
-                                                 )),
+                                                  )),
                                             
                                             imageOutput("plot")))),
                           tabPanel(title = 'ER summary table',
@@ -293,36 +302,40 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Gene ID"),
-                                                 shiny::tags$td("Gene symbol or Ensembl ID (based on version 92)")
+                                                 shiny::tags$td("Gene symbol or Ensembl ID (based on version 92).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Tissue"),
-                                                 shiny::tags$td("Selection of which GTEx tissues to plot (maximum of 3 for each plot)")
+                                                 shiny::tags$td("Selection of which GTEx tissues to plot (maximum of 3 for each plot).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Extend region to plot"),
-                                                 shiny::tags$td("Expands the region to plot defaulting to the +/- 10% of the length of the gene of interest (Auto) or a numeric value between 1000-50,000 indicating the number of bps")
+                                                 shiny::tags$td("Expands the region to plot defaulting to the +/- 10% of the length of the gene of interest (Auto) or a numeric value between 1000-50,000 indicating the number of bps.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Plot mean coverage"),
-                                                 shiny::tags$td("Tick to plot the base-level read depth across the region (plotted as a log10 aggregated over every 25 bases)")
+                                                 shiny::tags$td("Tick to plot the base-level read depth across the region (plotted as a log10 aggregated over every 25 bases).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Plot conservation"),
-                                                 shiny::tags$td("Tick to plot the conservation as phastCons7 across the region (aggregated over every 25 bases)")
+                                                 shiny::tags$td("Tick to plot the conservation as phastCons7 across the region (aggregated over every 25 bases).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Plot constraint"),
-                                                 shiny::tags$td("Tick to plot the constraint as CDTS across the region (aggregated over every 25 bases)")
+                                                 shiny::tags$td("Tick to plot the constraint as CDTS across the region (aggregated over every 25 bases).")
+                                               ),
+                                               shiny::tags$tr(
+                                                 shiny::tags$td("Plot CNC scores"),
+                                                 shiny::tags$td("Tick to plot constrained, non-conserved scores (CNCs) and constrained, non-conserved regions (CNCRs).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("SNP(s) of interest"),
-                                                 shiny::tags$td("Input the coordinates of a SNP in the form chrXX:start-end of which to highlight (SNP must overlap the region to be plotted)")
+                                                 shiny::tags$td("Input the coordinates of a SNP in the form chrXX:start-end of which to highlight (SNP must overlap the region to be plotted).")
                                                )
                              ),br(),
                              h3("vizER plot"),
                              p("The plot is designed to help visualise a gene of interest and easily discern whether there are misannotations in potential regions of interest (e.g. overlap with a variant of unknown significance)."),
-                             img(src = "ERLIN1_OMIM_reannot_example_vizER_w_help.png", 
+                             img(src = "ERLIN1_OMIM_reannot_example_w_help.png", 
                                  alt = "Annotated Plot",
                                  width = "100%",
                                  title = "Annotated Plot"),br(),
@@ -335,31 +348,31 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("ER_chr"),
-                                                 shiny::tags$td("Chromosome expressed region is found on (1-22,  X or Y)")
+                                                 shiny::tags$td("Chromosome expressed region is found on (1-22,  X or Y).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("ER_start"),
-                                                 shiny::tags$td("Start position of expressed region (hg38)")
+                                                 shiny::tags$td("Start position of expressed region (hg38).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("ER_end"),
-                                                 shiny::tags$td("End position of expressed region (hg38)")
+                                                 shiny::tags$td("End position of expressed region (hg38).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("ER_width"),
-                                                 shiny::tags$td("Total length in base pairs of expressed region")
+                                                 shiny::tags$td("Total length in base pairs of expressed region.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Tissue"),
-                                                 shiny::tags$td("The tissue from which the RNA was extracted, sequenced and analysed to derive the ER")
+                                                 shiny::tags$td("The tissue from which the RNA was extracted, sequenced and analysed to derive the ER.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Mean_coverage"),
-                                                 shiny::tags$td("A annotation agnostic measure of read depth (i.e. the mean number of reads overlapping each base of the ER averaged across all samples from the GTEx tissue)")
+                                                 shiny::tags$td("A annotation agnostic measure of read depth (i.e. the mean number of reads overlapping each base of the ER averaged across all samples from the GTEx tissue).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Ensembl_grch38_v92_region_annot"),
-                                                 shiny::tags$td("which annotation features (exon,  intron,  intergenic) the ER overlaps according to Ensembl v92")
+                                                 shiny::tags$td("which annotation features (exon,  intron,  intergenic) the ER overlaps according to Ensembl v92.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Misannot_type"),
@@ -367,65 +380,64 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Associated_gene"),
-                                                 shiny::tags$td("Ensembl ID of the gene of interest")
+                                                 shiny::tags$td("Ensembl ID of the gene of interest.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Overlap_any_gene_v92_name"),
-                                                 shiny::tags$td("Ensembl ID of the gene the expressed region overlaps")
+                                                 shiny::tags$td("Ensembl ID of the gene the expressed region overlaps.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Nearest_any_gene_v92_name"),
-                                                 shiny::tags$td("Ensembl ID of the gene the ER falls closest to in terms of genomic region")
+                                                 shiny::tags$td("Ensembl ID of the gene the ER falls closest to in terms of genomic region.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Nearest_any_gene_v92_distance"),
-                                                 shiny::tags$td("The distance in bp to the nearest gene")
+                                                 shiny::tags$td("The distance in bp to the nearest gene.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_annotation_type"),
-                                                 shiny::tags$td("A split read intersects with the ER and either the acceptor or donor overlaps with a known exon")
+                                                 shiny::tags$td("A split read intersects with the ER and either the acceptor or donor overlaps with a known exon.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_to_any_gene"),
-                                                 shiny::tags$td("the Ensembl ID that the split read intersecting the ER connects to")
+                                                 shiny::tags$td("the Ensembl ID that the split read intersecting the ER connects to.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_ids"),
-                                                 shiny::tags$td("Recount2 IDs of any split reads overlapping the ER separated by a ';'")
+                                                 shiny::tags$td("Recount2 IDs of any split reads overlapping the ER separated by a ';'.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_count_samp"),
-                                                 shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'")
+                                                 shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_propor_samp"),
-                                                 shiny::tags$td("Proportion of samples of that tissue that any split reads overlapping the ER are detected withinseparated by a ';'")
+                                                 shiny::tags$td("Proportion of samples of that tissue that any split reads overlapping the ER are detected withinseparated by a ';'.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_starts"),
-                                                 shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'")
+                                                 shiny::tags$td("start positions of any split reads overlapping the ER separated by a ';'.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Split_read_ends"),
-                                                 shiny::tags$td("End positions of any split reads overlapping the ER separated by a ';'")
+                                                 shiny::tags$td("End positions of any split reads overlapping the ER separated by a ';'.")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Mean_CDTS_percentile"),
-                                                 shiny::tags$td("Mean percentile of constraint (tolerance of mutation using alignment of 7794 human genomes) across the ER (1 being the most constrained/highest evidence of functional role in humans)")
+                                                 shiny::tags$td("Mean percentile of constraint (tolerance of mutation using alignment of 7794 human genomes) across the ER (1 being the most constrained/highest evidence of functional role in humans).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Mean_phast_cons_7"),
-                                                 shiny::tags$td("Mean conservation (7 species) across the ER (0 - 1 with 1 being the most conserved)")
+                                                 shiny::tags$td("Mean conservation (7 species) across the ER (0 - 1 with 1 being the most conserved).")
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("Mean_phast_cons_100"),
-                                                 shiny::tags$td("Mean conservation (100 species) across the ER (0 - 1 with 1 being the most conserved)")
+                                                 shiny::tags$td("Mean conservation (100 species) across the ER (0 - 1 with 1 being the most conserved.)")
                                                )
                              ),br()
                              # uiOutput("annotated")
                       ))),
            tabPanel("Contact",
-                    
                     fluidRow(
                       column(12,
                              h3("Ryten Lab"),br(), 
@@ -571,6 +583,9 @@ server <- function(input, output, session) {
       shinyjs::disable("get_mean_cov")
     }
   }, ignoreNULL = FALSE)
+  
+  
+  
   
   
   
