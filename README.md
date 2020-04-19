@@ -9,7 +9,7 @@ Related publication -
 ## Description
 This repository contains the User Interface (UI) code for the vizER platform.
 
-Additionally, on the Wiki section, there are available a collection of tutorials that fully explain the configuration needed to be able to install and expose vizER in a Linux web server environment.
+Additionally, on the Wiki section, there is available a [tutorial](https://github.com/SoniaRuiz/vizER/wiki/Deploying-vizER-in-Apache) that fully explain the configuration needed to be able to install and expose vizER in a Linux web server environment.
 
 ## Getting Started
 vizER platform is fully working and can be reached following [this link](https://snca.atica.um.es/browser/app/vizER).
@@ -21,7 +21,9 @@ For further information about this publication, please visit [this](https://www.
 
 ## Developers
 * **Sonia García-Ruiz** - vizER UI developer.
+  * Get in touch with Sonia García at [s.ruiz@ucl.ac.uk](mailto:s.ruiz@ucl.ac.uk).
 * **David Zhang** - vizER backend developer and first author of *'Incomplete annotation of OMIM genes is likely to be limiting the diagnostic yield of genetic testing, particularly for neurogenetic disorders'*.
+  * Get in touch with David Zhang at [david.zhang12@ucl.ac.uk](mailto:david.zhang12@ucl.ac.uk).
 
 ## Acknowledgments
 * All [RytenLab](https://snca.atica.um.es/RytenLab/Team) members
