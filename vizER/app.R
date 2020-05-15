@@ -230,8 +230,11 @@ navbarPage(title = "Visualisation of Expressed Regions",
                     fluidRow(
                       column(12,
                              h1("Download"),
-                             p("Below are links and descriptions to download expressed region data associated with the publication:",
-                               a(href="https://www.biorxiv.org/content/10.1101/499103v2", "Incomplete annotation of disease-associated genes is limiting our understanding of Mendelian and complex neurogenetic disorders", target="_blank"), ".", br(), "Comments describing the contents of the columns can be found on top of each file."),br(),
+                             p("Below, are links and descriptions to download expressed region data associated with the publication:",
+                               a(href="https://www.biorxiv.org/content/10.1101/499103v2", "Incomplete annotation of disease-associated genes is limiting our understanding of Mendelian and complex neurogenetic disorders", target="_blank"),
+                               br(), "For the CNC scores and CNCRs, please visit the publication: ",
+                               a(href="https://www.biorxiv.org/content/10.1101/2020.04.17.046441v1", "Human-lineage-specific genomic elements: relevance to neurodegenerative disease and APOE transcript usage", target="_blank"),
+                               br(),br(), "Comments describing the contents of the columns can be found on top of each file."),br(),
                              h3("Data"),
                              shiny::tags$table(id = "download-paper-data",
                                                shiny::tags$tr(
@@ -261,7 +264,10 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                ),
                                                shiny::tags$tr(
                                                  shiny::tags$td("genes_cutoff1_most_constrained_w_density.rda.gz"),
-                                                 shiny::tags$td("Table of genes within the constrained, non-conserved regions (CNCRs) annotation with density of CNCRs per gene (Ensembl v.92)."),
+                                                 shiny::tags$td(p("Table of genes within the constrained, non-conserved regions (CNCRs) annotation with density of CNCRs per gene (Ensembl v.92)."),
+                                                                p("For further information on CNC scores and CNCRs, please see our paper: ", a(href="https://www.biorxiv.org/content/10.1101/2020.04.17.046441v1",
+                                                                                                                                                     "Human-lineage-specific genomic elements: relevance to neurodegenerative disease and APOE transcript usage",
+                                                                                                                                                     target="_blank"),".")),
                                                  shiny::tags$td(downloadButton(outputId = "d_genes_cutoff1", label = "Download"))
                                                )
                              ),br()

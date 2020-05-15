@@ -21,13 +21,13 @@ if(!web_app){
 
 ################## need to be modified depending on running on MR server or murcia ################## 
 
-# mean_coverage_path <- "/root/vizER/vizER_data/by_tissue_smfrze_use_me/"
-# path_to_data_folder <- "/root/vizER/vizER_data/"
-# output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
+mean_coverage_path <- "/root/vizER/vizER_data/by_tissue_smfrze_use_me/"
+path_to_data_folder <- "/root/vizER/vizER_data/"
+output_image_path <- "/root/vizER/www/OMIM_reannot_plot.png"
 
-mean_coverage_path <- "/data/recount/GTEx_SRP012682/gtex_mean_coverage/by_tissue_smfrze_use_me/"
-path_to_data_folder <- "/home/sruiz/PROJECTS/vizER/data/"
-output_image_path <- "www/OMIM_reannot_plot.png"
+#mean_coverage_path <- "/data/recount/GTEx_SRP012682/gtex_mean_coverage/by_tissue_smfrze_use_me/"
+#path_to_data_folder <- "/home/sruiz/PROJECTS/vizER/data/"
+#output_image_path <- "www/OMIM_reannot_plot.png"
 
 #####################################################################################################
 
