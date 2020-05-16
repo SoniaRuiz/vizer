@@ -31,7 +31,7 @@ proxy:
   - id: vizER
     display-name: vizER
     container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
-    container-image: vizerv2
+    container-image: vizer
     container-volumes: [ "/home_2/gsit/vizER_data:/root/vizER/vizER_data" ]
   - id: vizER_test
     display-name: vizER_test

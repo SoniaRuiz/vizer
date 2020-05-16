@@ -14,6 +14,14 @@ library(RSQLite)
 
 # Generate alphabetical tissue choices
 
+################## need to be modified depending on running on MR server or murcia ################## 
+
+#zoomed_image <- "/root/vizER/www/OMIM_reannot_mobile_plot.png"
+
+zoomed_image <- "/home/sruiz/PROJECTS/vizER/vizER/vizER/www/OMIM_reannot_mobile_plot.png"
+
+################## CODE ################## 
+
 tissue_GTEx_choices <- c("Adipose - subcutaneous" =	"adipose_subcutaneous",
                          "Adipose - visceral" =	"adipose_visceral_omentum",
                          "Adrenal gland" =	"adrenal_gland",
@@ -610,7 +618,7 @@ server <- function(input, output, session) {
     genePlot()
     shinyjs::enable("update")
     
-    list(src = "www/OMIM_reannot_mobile_plot.png",  
+    list(src = zoomed_image,  
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
@@ -627,7 +635,7 @@ server <- function(input, output, session) {
       paste0(input$geneid,"-", input$tissue, "-", Sys.time(), "vizER_plot.png", sep="")
     },
     content = function(file) { 
-      file.copy("www/OMIM_reannot_mobile_plot.png", file)
+      file.copy(zoomed_image, file)
     },
     contentType = "image/png"
   )   
