@@ -16,9 +16,9 @@ library(RSQLite)
 
 ################## need to be modified depending on running on MR server or murcia ################## 
 
-#zoomed_image <- "/root/vizER/www/OMIM_reannot_mobile_plot.png"
+zoomed_image <- "/root/vizER/www/OMIM_reannot_mobile_plot.png"
 
-zoomed_image <- "/home/sruiz/PROJECTS/vizER/vizER/vizER/www/OMIM_reannot_mobile_plot.png"
+#zoomed_image <- "www/OMIM_reannot_mobile_plot.png"
 
 ################## CODE ################## 
 
@@ -92,11 +92,9 @@ ui <- fluidPage(
                        if(path != undefined)
                        window.top.location.href = path;
                        });'),
-   
-    
-    
-    
+
     shiny::tags$script('$(document).ready(function(){
+                        
                         $(window).resize(function(){
                         var $zoomImg = $("#plot img");
                         var height = $zoomImg.height();
@@ -176,6 +174,8 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                             singleton(
                                               shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
                                                                                   function(message) {
+                                                                                  console.log("Shiny.addCustomMessageHandler: startzoom")
+                                                                   
                                                                                   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
                                                                                   $("#plot img").elevateZoom({
                                                                                   zoomWindowPosition:7,
@@ -201,17 +201,19 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                                                     function(message) {
                                                                     $.removeData($("#plot img"), "elevateZoom");
                                                                     $(".zoomContainer").remove();
-                                                                    }
-                                                  );'),
+                                                                    });'),
                                                   shiny::tags$script('$(document).on("shiny:value", function(e) {
-                                                                    console.log(e.name);
-                                                                    if (e.name == "plot") {  // mytable is the name / id of the output element
-                                                                    console.log(e.name);
-                                                                    Shiny.onInputChange("startzoom", "");
+                                                                    if (e.name == "plot") {
+                                                                      console.log(e.name);
+                                                                      //e.preventdefault();
+                                                                      Shiny.onInputChange("startzoom", "");
+
+
                                                                     }});')
-                                                  )),
+                                                  
                                             
-                                            imageOutput("plot")))),
+                                     )),
+                                     imageOutput("plot")))),
                           tabPanel(title = 'ER summary table',
                                    fluidRow(
                                      column(width = 12, 
@@ -287,13 +289,18 @@ navbarPage(title = "Visualisation of Expressed Regions",
                       navlistPanel(
                         tabPanel("Overview", fluidPage(
                           h3("Overview"),
-                          p("Next-generation sequencing has equipped researchers to discover mutations across the entire genome. However, the knowledge required to decipher which of these mutations is causal for each patient’s disease is still incomplete at both gene and variant level, in particular for those mutations that fall into non-coding regions of the genome. We improve upon the existing annotation of majority of genes that are currently known to cause Mendelian disorders (OMIM genes) broadening the genetic horizon which can be used to prioritise variants and eventually, assign pathogenicity. With this in mind, we have developed this online web resource vizER with the primary goal of aiding clinical scientists and clinicians to visualise misannotations of any gene of interest, enabling better variant prioritisation and as a result, diagnosis of Mendelian disorders.")
+                          p("Next-generation sequencing has equipped researchers to discover mutations across the entire genome. However, the knowledge required to decipher which of these mutations is causal for disease at an individual patient basis is still incomplete at both gene and variant level, in particular for those mutations that fall into non-coding regions of the genome. We improve upon the existing annotation of the majority of genes that are currently known to cause Mendelian disorders (OMIM genes) broadening the genetic horizon which can be used to prioritise variants and eventually, assign pathogenicity (Zhang et al. bioRxiv 2019. doi: ", a(href="https://doi.org/10.1101/499103", "https://doi.org/10.1101/499103).", target="_blank"),"We further add upon this by generating a novel annotation incorporating constrained, non-conserved metrics to highlight human-lineage-specific genomic regions (Chen et al. bioRxiv 2020. doi: ", a(href="https://doi.org/10.1101/2020.04.17.046441", "https://doi.org/10.1101/2020.04.17.046441).", target="_blank"),"This annotation prioritises genes and transcripts of relevance to disease, specifically in the identification of functionally important non-coding genomic regions. We have thus developed this online web resource, vizER, with the primary goal of aiding clinical scientists and clinicians to visualise misannotations of any gene of interest, enabling better variant prioritisation and as a result, diagnosis of both Mendelian disorders and complex genetics diseases.")
                         )),
-                        tabPanel("Publication", fluidPage(
-                          h3("Abstract"),
+                        tabPanel("Zhang et al. bioRxiv 2019", fluidPage(
+                          h3("Incomplete annotation of disease-associated genes is limiting our understanding of Mendelian and complex neurogenetic disorders"),
                           p("Although the increasing use of whole-exome and whole-genome sequencing have improved the yield of genetic testing for Mendelian disorders, an estimated 50% of patients still leave the clinic without a genetic diagnosis. This can be is attributed in part to our lack of ability to accurately interpret the genetic variation detected through next-generation sequencing. Variant interpretation is fundamentally reliant on accurate and complete gene annotation, however numerous reports and discrepancies between gene annotation databases reveals that the knowledge of gene annotation remains far from comprehensive. Here, we detect and validate transcription in an annotation-agnostic manner across all 41 different GTEx tissues, then connect novel transcription to known genes, ultimately improving the annotation of 63% of the known OMIM-morbid genes. We find the majority of novel transcription to be tissue-specific in origin with brain tissues being most susceptible to misannotation. Furthermore, we find that novel transcribed regions tend to be poorly conserved, but are significantly depleted for genetic variation within humans suggesting they are functionally significant and potentially have human-specific functions. We present our findings through an online platform vizER, which enables individual genes to be visualised and queried for evidence of misannotation. We also release all tissue-specific transcriptomes in a BED format for ease of integration with whole-genome sequencing data. We anticipate that these resources will improve the diagnostic yield for a wide range of Mendelian disorders."), 
-                          a(href="https://www.biorxiv.org/content/10.1101/499103v1", target="_blank","Read more")
-                        ))#,
+                          a(href="https://www.biorxiv.org/content/10.1101/499103v1", target="_blank", "Read more")
+                        )),
+                        tabPanel("Chen et al. bioRxiv 2020", fluidPage(
+                          h3("Human-lineage-specific genomic elements: relevance to neurodegenerative disease and APOE transcript usage"),
+                          p("Knowledge of genomic features specific to the human lineage may provide insights into brain-related diseases. We leverage high-depth whole genome sequencing data to generate a combined annotation identifying regions simultaneously depleted for genetic variation (constrained regions) and poorly conserved across primates. We propose that these constrained, non-conserved regions (CNCRs) have been subject to human-specific purifying selection and are enriched for brain-specific elements. We find that CNCRs are depleted from protein-coding genes but enriched within lncRNAs. We demonstrate that per-SNP heritability of a range of brain-relevant phenotypes are enriched within CNCRs. We find that genes implicated in neurological diseases have high CNCR density, including APOE, highlighting an unannotated intron-3 retention event. Using human brain RNA-sequencing data, we show the intron-3-retaining transcript/s to be more abundant in Alzheimer’s disease with more severe tau and amyloid pathological burden. Thus, we demonstrate the importance of human-lineage-specific sequences in brain development and neurological disease. We release our annotation through vizER", a(href="https://snca.atica.um.es/browser/app/vizER","https://snca.atica.um.es/browser/app/vizER",target="_blank" ),"."), 
+                          a(href="https://doi.org/10.1101/2020.04.17.046441", target="_blank", "Read more")
+                        ))
                         #tabPanel("Citation", fluidPage(
                         #  h3("Citation"),
                         #  p("To reference this resource please use:"), 
@@ -462,7 +469,9 @@ navbarPage(title = "Visualisation of Expressed Regions",
                              br(),br(),
                              h4("For any questions related to this resource or publication please contact:"),
                              p("Mina Ryten for queries relating to data access -", a(href="mailto:mina.ryten@ucl.ac.uk","mina.ryten@ucl.ac.uk")),
-                             p("David Zhang for technical issues and general questions about the project -", a(href="mailto:david.zhang.12@ucl.ac.uk","david.zhang.12@ucl.ac.uk"))
+                             p("David Zhang for technical issues and general questions about the project -", a(href="mailto:david.zhang.12@ucl.ac.uk","david.zhang.12@ucl.ac.uk")),
+                             p("Zhongbo Chen for queries relating to CNC scores and CNCRs -", a(href="mailto:zhongbo.chen@ucl.ac.uk","zhongbo.chen@ucl.ac.uk")),
+                             p("Sonia García-Ruiz for technical issues about the User Interface (UI) -", a(href="mailto:s.ruiz@ucl.ac.uk","s.ruiz@ucl.ac.uk"))
                              
                       )))
                     ),
@@ -490,8 +499,7 @@ server <- function(input, output, session) {
       
       
       ######### STOP ZOOMING ###########
-      session$sendCustomMessage(type = 'stopzoom',
-                                message = list())  
+      #session$sendCustomMessage(type = 'stopzoom', message = list())  
       
       ######### DAVID'S FUNCTIONS ###########
       
@@ -530,6 +538,7 @@ server <- function(input, output, session) {
       
       ######### BODY LOADING CLASS ###########
       shinyjs::removeCssClass(class = "loading", selector = "body")
+
       
       ######### RETURN DATA ###########
       list(data = data)
@@ -558,22 +567,26 @@ server <- function(input, output, session) {
     if (!is.null(cdata[['gene']])) {
       updateTextInput(session, "geneid", value = cdata[['gene']])
     }
-    
   })
   
   
   observeEvent(input$startzoom,{
-    session$sendCustomMessage(type = 'startzoom', message = list())
-  })
-  
-  observeEvent(input$update,{
     updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Summary")
     updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
     session$sendCustomMessage(type = 'startzoom', message = list())
   })
+
+  
+  observeEvent(input$update,{
+   updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Summary")
+   updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
+   #session$sendCustomMessage(type = 'startzoom', message = list())
+  })
+  
   
   observeEvent(input$gen_browser_panel,{
     if(input$gen_browser_panel == "Plot"){
+      shinyjs::runjs("console.log('start')")
       session$sendCustomMessage(type = 'startzoom', message = list())       
     }
     else{
@@ -622,6 +635,7 @@ server <- function(input, output, session) {
          width = "95%",
          alt = "Plot",
          contentType = "image/png")
+    
   }, deleteFile = F)
   
   ######### SUMMARY TAB ###########
