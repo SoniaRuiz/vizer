@@ -92,52 +92,51 @@ ui <- fluidPage(
                        if(path != undefined)
                        window.top.location.href = path;
                        });'),
+    
 
     shiny::tags$script('$(document).ready(function(){
-                        
                         $(window).resize(function(){
-                        var zoomImg = $("#plot img");
-                        var height = zoomImg.height();
-                        
-                        $(".zoomWrapper").css("height", height);
-                        $(".zoomContainer .zoomWindow").css({"height": height});
-                        
-                        $.removeData($("#plot img"), "elevateZoom");
-                        $(".zoomContainer").remove();
-                        
-                        
-                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
-                        $("#plot img").elevateZoom({
-                        zoomWindowPosition:7,
-                        zoomWindowWidth:height/2,
-                        zoomWindowHeight:height/2,
-                        responsive:true
-                        //zoomLensWidth:75,
-                        //zoomLensHeight:75
+                          var zoomImg = $("#plot img");
+                       var height = zoomImg.height();
+                       
+                       $(".zoomWrapper").css("height", height);
+                       $(".zoomContainer .zoomWindow").css({"height": height});
+                       
+                       $.removeData($("#plot img"), "elevateZoom");
+                       $(".zoomContainer").remove();
+                       
+                       
+                       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
+                       $("#plot img").elevateZoom({
+                       zoomWindowPosition:7,
+                       zoomWindowWidth:height/2,
+                       zoomWindowHeight:height/2,
+                       responsive:true
+                       //zoomLensWidth:75,
+                       //zoomLensHeight:75
+                       });
+                       }
+                       else{
+                       $("#plot img").elevateZoom({
+                       zoomWindowPosition:11,
+                       zoomWindowWidth:height,
+                       zoomWindowHeight:height,
+                       scrollZoom:true,
+                       responsive:true
+                       });
+                       }
+                       
+                       
+                       //Only show the zoomContainer tab when clicking the vizER upper tab
+                       $("ul.navbar-nav li a").click(function() {
+                       if($(this).text() != "vizER"){
+                       $(".zoomContainer").hide()
+                       }else{
+                       $(".zoomContainer").show()
+                       }
+                       });
                         });
-                        }
-                        else{
-                        $("#plot img").elevateZoom({
-                        zoomWindowPosition:11,
-                        zoomWindowWidth:height,
-                        zoomWindowHeight:height,
-                        scrollZoom:true,
-                        responsive:true
-                        });
-                        }
-                        });
-
-                        //Only show the zoomContainer tab when clicking the vizER upper tab
-                        $("ul.navbar-nav li a").click(function() {
-                          if($(this).text() != "vizER"){
-                            $(".zoomContainer").hide()
-                          }else{
-                            $(".zoomContainer").show()
-                          }
-                        });
-
                        });'),
-
     
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
 ),
@@ -173,44 +172,46 @@ navbarPage(title = "Visualisation of Expressed Regions",
                                             br(),
                                             singleton(
                                               shiny::tags$head(shiny::tags$script('Shiny.addCustomMessageHandler("startzoom",
-                                                                                  function(message) {
-                                                                                  console.log("Shiny.addCustomMessageHandler: startzoom")
-                                                                   
-                                                                                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
-                                                                                  $("#plot img").elevateZoom({
-                                                                                  zoomWindowPosition:7,
-                                                                                  zoomWindowWidth:250,
-                                                                                  zoomWindowHeight:200, 
-                                                                                  responsive:true
-                                                                                  //zoomLensWidth:75,
-                                                                                  //zoomLensHeight:75
-                                                                                  });
-                                                                                  }
-                                                                                  else{
-                                                                                  $("#plot img").elevateZoom({
-                                                                                  zoomWindowPosition:11,
-                                                                                  zoomWindowWidth:450,
-                                                                                  zoomWindowHeight:450,
-                                                                                  scrollZoom:true,
-                                                                                  responsive:true
-                                                                                  });
-                                                                                  }
-                                                                                  }
+                                                                                    function(message) {
+                                                                                      console.log("Shiny.addCustomMessageHandler: startzoom")
+                                                                       
+                                                                                      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) { 
+                                                                                      $("#plot img").elevateZoom({
+                                                                                      zoomWindowPosition:7,
+                                                                                      zoomWindowWidth:250,
+                                                                                      zoomWindowHeight:200, 
+                                                                                      responsive:true
+                                                                                      //zoomLensWidth:75,
+                                                                                      //zoomLensHeight:75
+                                                                                      });
+                                                                                      }
+                                                                                      else{
+                                                                                      $("#plot img").elevateZoom({
+                                                                                      zoomWindowPosition:11,
+                                                                                      zoomWindowWidth:450,
+                                                                                      zoomWindowHeight:450,
+                                                                                      scrollZoom:true,
+                                                                                      responsive:true
+                                                                                      });
+                                                                                      }
+                                                                                    }
                                                                                   );'),
                                                   shiny::tags$script('Shiny.addCustomMessageHandler("stopzoom",
-                                                                    function(message) {
-                                                                    console.log("Shiny.addCustomMessageHandler: stopzoom")
-                                                                    $.removeData($("#plot img"), "elevateZoom");
-                                                                    $(".zoomContainer").remove();
-                                                                    });'),
+                                                                      function(message) {
+                                                                        console.log("Shiny.addCustomMessageHandler: stopzoom")
+                                                                        $.removeData($("#plot img"), "elevateZoom");
+                                                                        $(".zoomContainer").remove();
+                                                                      }
+                                                                     );'),
                                                   shiny::tags$script('$(document).on("shiny:value", function(e) {
-                                                                    if (e.name == "plot") {
-                                                                      console.log(e.name);
-                                                                      Shiny.onInputChange("stopzoom", "");
-                                                                      Shiny.onInputChange("startzoom", "");
-
-
-                                                                    }});')
+                                                                      if (e.name == "plot") {
+                                                                        //if(e.target.children[0] != undefined){
+                                                                        //}else{
+                                                                          Shiny.setInputValue("stopzoom", "",{priority: "event"});
+                                                                          Shiny.setInputValue("startzoom", "",{priority: "event"});
+                                                                        //}
+                                                                      }
+                                                                     });')
                                                   
                                             
                                      )),
@@ -583,20 +584,20 @@ server <- function(input, output, session) {
   })
 
   
-  observeEvent(input$update,{
-    updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
-    #session$sendCustomMessage(type = 'stopzoom', message = list())
-    #session$sendCustomMessage(type = 'startzoom', message = list())
-  })
+  # observeEvent(input$update,{
+  #   updateTabsetPanel(session = session, inputId = "gen_browser_panel", selected = "Plot")
+  #   session$sendCustomMessage(type = 'stopzoom', message = list())
+  #   session$sendCustomMessage(type = 'startzoom', message = list())
+  # })
   
   
   observeEvent(input$gen_browser_panel,{
     if(input$gen_browser_panel == "Plot"){
       shinyjs::runjs("console.log('start')")
-      session$sendCustomMessage(type = 'startzoom', message = list())       
+      session$sendCustomMessage(type = 'startzoom', message = list())
     }
     else{
-      session$sendCustomMessage(type = 'stopzoom', message = list())  
+      session$sendCustomMessage(type = 'stopzoom', message = list())
     }
   })
   
@@ -636,10 +637,15 @@ server <- function(input, output, session) {
     shinyjs::disable("download_data")
     shinyjs::disable("download_bed")
     
-    genePlot()
-    shinyjs::enable("update")
-    #shinyjs::runjs("$('#plot img').attr('zoom-image', 'www/OMIM_reannot_mobile_plot.png');")
     
+    shinyjs::runjs("$('#plot img').remove();")
+    
+    genePlot()
+    #shinyjs::enable("update")
+    #shinyjs::runjs("$('#plot img').attr('src', 'www/OMIM_reannot_mobile_plot.png');")
+    #shinyjs::runjs("$('#plot img').elevateZoom({zoomWindowPosition:7,zoomWindowWidth:250,zoomWindowHeight:200,responsive:true});")
+    
+    #session$sendCustomMessage(type = 'startzoom', message = list())
     
     list(src = zoomed_image,  
          width = "95%",
