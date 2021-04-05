@@ -2,32 +2,17 @@ server:
   servlet:
     context-path: /browser/
 proxy:
-  #landing page: /
   hide-navbar: true
   heartbeat-rate: 10000
   heartbeat-timeout: 60000
   container-wait-time: 100000
-  #authentication: simple
   authentication: none
   port: 2525
-  #container-backend: docker
-  #users:
-  #- name: mina
-  #  password: mina
-  #  groups: rytenlab
-  #- name: sonia
-  #  password: sonia
-  #  groups: rytenlab
   docker:
-    #internal-networking: true
     url: http://localhost:2375
     port-range-start: 20000
     port-range-max: 20020
   specs:
-  #- id: vizER
-  #  display-name: vizER
-  #  container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
-  #  container-image: vizer_shinyproxy_v2
   - id: vizER
     display-name: vizER
     container-cmd: ["R", "-e shiny::runApp('/root/vizER')"]
@@ -38,7 +23,6 @@ proxy:
     container-cmd: ["R", "-e", "shiny::runApp('/root/vizER')"]
     container-image: vizer_test
     container-volumes: [ "/home_2/gsit/vizER_data:/root/vizER/vizER_data" ]
-  #  access-groups: rytenlab
 logging:
   file:
     shinyproxy.log
