@@ -1,4 +1,4 @@
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5012214.svg)](https://doi.org/10.5281/zenodo.5012214)
 # vizER
 A platform that enables the visualisation of individual genes for evidence of reannotation.  
 
