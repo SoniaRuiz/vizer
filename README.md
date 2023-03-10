@@ -2,9 +2,13 @@
 # vizER
 A platform that enables the visualisation of individual genes for evidence of reannotation.  
 
-Related publication - 
-**Incomplete annotation of OMIM genes is likely to be limiting the diagnostic yield of genetic testing, particularly for neurogenetic disorders** 
-(https://www.biorxiv.org/content/10.1101/499103v1)
+## Related publication 
+
+**Incomplete annotation has a disproportionate impact on our understanding of Mendelian and complex neurogenetic disorders**
+
+[David Zhang](HTTPS://ORCID.ORG/0000-0003-2382-8460), Sebastian Guelfi, [Sonia Garcia-Ruiz](https://orcid.org/0000-0003-4913-5312), Beatrice Costa, [Regina H. Reynolds](HTTPS://ORCID.ORG/0000-0001-6470-7919), Karishma D'sa, [Wenfei Liu](HTTPS://ORCID.ORG/0000-0003-0322-4344), [Thomas Courtin](HTTPS://ORCID.ORG/0000-0002-0275-2498), [Amy Peterson](HTTPS://ORCID.ORG/0000-0002-7789-7982), [Andrew E. Jaffe](HTTPS://ORCID.ORG/0000-0001-6886-1454), [John Hardy](HTTPS://ORCID.ORG/0000-0002-3122-0423), [Juan A. Botía](HTTPS://ORCID.ORG/0000-0002-6992-598X), [Leonardo Collado-Torres](HTTPS://ORCID.ORG/0000-0003-2140-308X), and [Mina Ryten](HTTPS://ORCID.ORG/0000-0001-9520-6957)
+
+**SCIENCE ADVANCES**, 10 Jun 2020, Vol 6, Issue 24, DOI: [10.1126/sciadv.aay8299](https://www.science.org/doi/10.1126/sciadv.aay8299)
 
 ## Description
 This repository contains the User Interface (UI) code for the vizER platform.
